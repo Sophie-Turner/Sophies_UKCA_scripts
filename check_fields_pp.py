@@ -6,10 +6,11 @@ Check the order and number of fields in .pp file and their values' ranges.
 '''
 
 import cf
+import numpy as np
 import file_paths as paths
 
 # A sample UM output .pp file or list of files.
-um_files = [f'{paths.pp}/cy731a.pl20160807.pp']
+um_files = [f'{paths.pp}/dt341a.px19820115_preds.pp']
 
 for um_file in um_files:
   print(f'\n{um_file}')
@@ -17,14 +18,19 @@ for um_file in um_files:
   # Open it in CF Python.
   print('Loading data.')
   day = cf.read(um_file)
-
-  for field in day:
+  
+  for i in range(len(day)):
+    field = day[i]
     # Long name is more informative than identity.
     try:
       name = field.long_name
     # Sometimes a field has no long name.
     except:
       name = field.identity()
-    print(f'{name} ranges from {field.min()} to {field.max()}')
+    print(i, name)
+    #print(f'{name} ranges from {field.min()} to {field.max()}')
+    #print('Shape of field:', field.shape)
+  
+  print(f'There are {len(day)} fields in the dataset.\n')
 
-  print(f'There are {len(day)} fields in the dataset.')
+  

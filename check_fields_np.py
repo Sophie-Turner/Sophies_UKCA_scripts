@@ -9,7 +9,7 @@ import numpy as np
 import file_paths as paths
 
 # A sample UM output .pp file.
-npy_file = f'{paths.npy}/test_day.npy'
+npy_file = f'{paths.npy}/19820115_preds.npy'
 
 # Open it in CF Python.
 print('Loading data.')

@@ -15,7 +15,7 @@ import matplotlib.pyplot as plt
 
 # Rob's code.
 def lvl_to_alt(grid_dict: dict, orography: float, 
-                             include_surface: bool = False) -> list:
+               include_surface: bool = False) -> list:
     """
     Function to calculate model level heights above ground for a single vertical column. 
     Args:

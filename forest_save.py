@@ -21,8 +21,8 @@ from sklearn.preprocessing import StandardScaler as scaler
 scale = False
 
 # File paths.
-data_path = f'{paths.npy}/full_range_yr_182m.npy'
-out_name = 'rf_full_range_yr'
+data_path = f'{paths.npy}/1982_182m.npy'
+out_name = 'rf_fortran_poc'
 if scale:
   out_name = f'{out_name}_scaled'
 out_dir = f'{paths.mod}/{out_name}'
@@ -51,27 +51,31 @@ print(data.shape)
 end = time.time()
 print(f'Loading the data took {round(end-start)} seconds.')
 
+# Indices of 1982 training data in full npy datatset.
+inputs_idx = [0,1,2,4,5,9,10,11,8,12]
+targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
+
 # Get inputs and targets.
-inputs, targets = fns.in_out_swap(data, con.phys_main, con.J_strat_trop)
+inputs, targets = fns.in_out_swap(data, inputs_idx, targets_idx)
 
 # Scale inputs.
 if scale:
   in_scale = scaler()
   inputs = in_scale.fit_transform(inputs)
   
-# 90/10 train test split.  
-in_train, in_test, out_train, out_test, i_test = fns.tts(inputs, targets)
+# 99/1 train test split.  
+in_train, in_test, out_train, out_test, i_test = fns.tts(inputs, targets, 0.01)
 
 # Scale training targets except for NO3.
 if scale:
   out_scale = scaler()
   out_scale.fit(targets)
-  #NO3 = out_train[:, 11].copy()
+  NO3 = out_train[:, 11].copy()
   out_train = out_scale.transform(out_train)
-  #out_train[:, 11] = NO3
+  out_train[:, 11] = NO3
 
 # Make the regression model.
-model = RandomForestRegressor(n_estimators=20, n_jobs=20, max_features=0.3, max_samples=0.2, max_leaf_nodes=100000, random_state=con.seed)
+model = RandomForestRegressor(n_estimators=20, n_jobs=20, max_features=0.2, max_samples=0.1, max_leaf_nodes=100000, random_state=con.seed)
 
 # Train the model.
 start = time.time()
@@ -88,9 +92,9 @@ print(f'Overall average R2 score for all J rates: {round(r2, 3)}')
 # Reverse scaling on test inputs and predictions, except for NO3, which was not scaled.
 if scale:
   in_test = in_scale.inverse_transform(in_test)
-  #NO3 = out_pred[:, 11].copy()
+  NO3 = out_pred[:, 11].copy()
   out_pred = out_scale.inverse_transform(out_pred)
-  #out_pred[:, 11] = NO3
+  out_pred[:, 11] = NO3
 
 # Save the trained model, data and scalers.
 start = time.time()
@@ -122,19 +126,19 @@ else:
 meta = f'Date: {datetime.date.today()}\n\
 {model_path}: random forest model, made using scikit-learn. Read into Python using joblib.\n\
 {text}\
-{out_test_path}: 2d numpy array of test targets dataset for the random forest, from a 90% train, 10% test split of the training data, of shape(samples, features).\n\
+{out_test_path}: 2d numpy array of test targets dataset for the random forest, from a 99% train, 1% test split of the training data, of shape(samples, features).\n\
 {pred_path}: 2d numpy array of predictions from the above test set, of shape(samples, features).\n\
 {in_test_path}: 2d numpy array of inputs used to make the above datasets, of shape(samples, features).\n\
 Training data: {data_path}\n\
-Data alterations: 99% of samples from day-time data, 1% from night-time data.\n\
-Inputs: phys_main. Hour of day, altitude km, latitude deg, longitude deg, days since 1/1/2015, humidity, cloud fraction, pressure Pa, solar zenith angle in cos radians, upward shortwave flux, downward shortwave flux, temperature K.\n\
-Targets: All strat-trop J rates which are not duplicate functional groups or all zero.\n\
+Data alterations: 99.5% of samples from day-time data, 0.5% from night-time data.\n\
+Inputs: Day of year, hour of day, model level, latitude, longitude, solar zenith angle, upward shortwave flux, downward shortwave flux, pressure, temperature.\n\
+Targets: All strat-trop J rates.\n\
 Trees: {len(model.estimators_)}.\n\
-Max leaves per tree: 100,000.\n\
+Max leaves per tree: 100000.\n\
 Nodes per tree: {model.estimators_[0].tree_.node_count}.\n\
 Tree depth: {model.estimators_[0].tree_.max_depth}.\n\
-Max features per tree: 30% of data.\n\
-Max samples per tree: 20% of data.\n\
+Max features per tree: 20% of data.\n\
+Max samples per tree: 10% of data.\n\
 Random number generator seed for sampling, test split and forest creation: {con.seed}.'
 meta_file = open(meta_path, 'w')
 meta_file.write(meta)

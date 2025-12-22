@@ -2,7 +2,7 @@
 Name: Sophie Turner.
 Date: 8/3/2024.
 Contact: st838@cam.ac.uk
-Compile data from daily UM .pp files and make a big .npy file containing all UKCA data flattened.
+Compile data from daily UM .pp files and make .npy files containing the UKCA data flattened.
 For use on Cambridge chemistry department's atmospheric servers. 
 Files are located at scratch/st838/netscratch.
 '''

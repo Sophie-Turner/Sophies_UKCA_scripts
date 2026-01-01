@@ -11,7 +11,7 @@ import functions as fns
 import file_paths as paths
 from sklearn.metrics import r2_score
 
-model_name = 'rf_fortran_poc'
+model_name = 'rf_fortran_poc_adjusted_sza'
 print(model_name)
   
 # Load the model data.

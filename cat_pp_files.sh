@@ -1,4 +1,5 @@
 #!/bin/bash
+# Stick output files together.
 
 # Loop through all .pl files
 for plfile in dt341a.pl*.pp; do
@@ -7,7 +8,8 @@ for plfile in dt341a.pl*.pp; do
     date=${date%.pp}
     # Construct matching pn filename
     pnfile="dt341a.pn${date}.pp"
+    pqfile="dt341a.pq${date}.pp"
     newfile="dt341a.px${date}.pp"
     # Concatenate files.
-    cat "$plfile" "$pnfile" > "$newfile"
+    cat "$pnfile" "$plfile" "$pqfile" > "$newfile"
 done

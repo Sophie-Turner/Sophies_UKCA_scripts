@@ -9,7 +9,7 @@ import numpy as np
 import file_paths as paths
 from netCDF4 import Dataset
 
-model_name = 'rf_fortran_poc'
+model_name = 'rf_fortran_poc_fixed_days'
 model_path = f'{paths.mod}/{model_name}/{model_name}.pkl'
 netcdf_path = f'{paths.mod}/{model_name}/{model_name}_structure.nc'
 

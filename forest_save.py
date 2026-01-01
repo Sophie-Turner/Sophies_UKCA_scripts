@@ -21,8 +21,8 @@ from sklearn.preprocessing import StandardScaler as scaler
 scale = False
 
 # File paths.
-data_path = f'{paths.npy}/1982_182m.npy'
-out_name = 'rf_fortran_poc'
+data_path = f'{paths.npy}/1982_182m_adjusted_sza.npy'
+out_name = 'rf_fortran_poc_adjusted_sza'
 if scale:
   out_name = f'{out_name}_scaled'
 out_dir = f'{paths.mod}/{out_name}'
@@ -45,7 +45,7 @@ else:
   os.mkdir(out_dir)
 
 start = time.time()
-print('\nLoading data')
+print('\nLoading data from', data_path)
 data = np.load(data_path)
 print(data.shape)
 end = time.time()
@@ -98,7 +98,8 @@ if scale:
 
 # Save the trained model, data and scalers.
 start = time.time()
-print('Saving random forest model, and scalers if chosen.')
+print('Saving random forest model, and scalers if chosen, to')
+print(model_path)
 joblib.dump(model, model_path) 
 if scale:
   joblib.dump(in_scale, in_scale_path)
@@ -131,6 +132,7 @@ meta = f'Date: {datetime.date.today()}\n\
 {in_test_path}: 2d numpy array of inputs used to make the above datasets, of shape(samples, features).\n\
 Training data: {data_path}\n\
 Data alterations: 99.5% of samples from day-time data, 0.5% from night-time data.\n\
+  Solar zenith angle at night changed from 90 to 100 degrees.\n\
 Inputs: Day of year, hour of day, model level, latitude, longitude, solar zenith angle, upward shortwave flux, downward shortwave flux, pressure, temperature.\n\
 Targets: All strat-trop J rates.\n\
 Trees: {len(model.estimators_)}.\n\

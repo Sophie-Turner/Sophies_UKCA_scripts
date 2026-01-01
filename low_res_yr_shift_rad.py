@@ -121,7 +121,7 @@ for i in range(2):
   data_yesterday = data 
   # Remove the first timestep of the dataset as we have no radiation to put in that.
   if i == 0:
-    print('Removing first timestep of dataset.', data_new.shape)
+    print('Removing first timestep of dataset.')
     mask = ~(data_new[1] == 0)
     data_new = data_new[:, mask]
   end = time.time()

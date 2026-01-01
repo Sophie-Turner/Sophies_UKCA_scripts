@@ -39,7 +39,7 @@ def sample_day_night_random(i, year_files, points, data_new):
   print(f'Processing file {i+1} of {len(year_files)}.')
   # Get this file.
   day_file = year_files[i]
-  data = np.load(day_file)
+  data = np.load(day_file)  
   # Split into day and night portions and remove any negative values. 
   # Index 11 is downward shortwave flux.
   day_data = data[:, data[11] > 0] 
@@ -84,10 +84,10 @@ def sample_all_uniform_time(i, year_files, points, data_new):
   
 
 # How many data points we want per chosen day of data.
-points = 505000
+points = 504000
 
 # Prepare the new file and data array of 32 bit floats.
-name_new = '1982_183m'
+name_new = '1982_182m_fixed_days'
 path_data_new = f'{paths.npy}/{name_new}.npy'
 path_meta_new = f'{paths.npy}/{name_new}_metadata.txt'
 #data_new = np.empty((con.n_fields, 0), dtype=np.float32)
@@ -105,7 +105,7 @@ year_files = sorted(glob.glob(f'{paths.npy}/1982????.npy'))
 # Every day file...
 for i in range(len(year_files)):
   start = time.time()
-  data_new = sample_all_uniform_time(i, year_files, points, data_new)
+  data_new = sample_day_night_random(i, year_files, points, data_new)
   end = time.time()
   elapsed = end - start
   remaining = elapsed * (len(year_files) - (i + 1))

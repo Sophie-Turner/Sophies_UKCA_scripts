@@ -2,14 +2,15 @@
 # Stick output files together.
 
 # Loop through all .pl files
-for plfile in dt341a.pl*.pp; do
+for plfile in dv856a.pl*.pp; do
     # Extract date from filename: characters after 'pl' and before '.pp'
-    date=${plfile#dt341a.pl}
+    date=${plfile#dv856a.pl}
     date=${date%.pp}
+    echo ${date}
     # Construct matching pn filename
-    pnfile="dt341a.pn${date}.pp"
-    pqfile="dt341a.pq${date}.pp"
-    newfile="dt341a.px${date}.pp"
+    pnfile="dv856a.pn${date}.pp"
+    pqfile="dv856a.pq${date}.pp"
+    newfile="dv856a.px${date}.pp"
     # Concatenate files.
     cat "$pnfile" "$plfile" "$pqfile" > "$newfile"
 done

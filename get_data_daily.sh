@@ -3,7 +3,7 @@
 # Run at same time as its counterpart on MASS server.
 
 SUITE="dv856"
-DIR="ml1yr"
+DIR="ml1yr_masked"
 
 # Make a ready flag.
 touch "done.flag"

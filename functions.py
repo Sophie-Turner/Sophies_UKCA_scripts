@@ -9,7 +9,6 @@ Files are located at scratch/st838/netscratch.
 # conda activate /home/st838/nethome/condaenv
 # Tell this script to run with the currently active Python environment, not the computer's local versions. 
 #!/usr/bin/env python
-
 import os
 import math
 import glob

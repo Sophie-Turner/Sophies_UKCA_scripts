@@ -10,7 +10,7 @@ import numpy as np
 import file_paths as paths
 
 # A sample UM output .pp file or list of files.
-um_files = [f'{paths.pp}/dt341a.px19820115_preds.pp']
+um_files = [f'{paths.data}/fj30yr/dv850a.px1982feb.pp']
 
 for um_file in um_files:
   print(f'\n{um_file}')
@@ -28,9 +28,7 @@ for um_file in um_files:
     except:
       name = field.identity()
     print(i, name)
-    #print(f'{name} ranges from {field.min()} to {field.max()}')
-    #print('Shape of field:', field.shape)
+    print(f'{name} ranges from {field.min()} to {field.max()}')
+    print('Shape of field:', field.shape)
   
-  print(f'There are {len(day)} fields in the dataset.\n')
-
-  
+  print(f'There are {len(day)} fields in the dataset.\n')  

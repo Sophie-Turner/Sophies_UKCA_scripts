@@ -133,7 +133,8 @@ meta = f'Date: {datetime.date.today()}\n\
 Training data: {data_path}\n\
 Data alterations: 99.5% of samples from day-time data, 0.5% from night-time data.\n\
   Solar zenith angle at night changed from 90 to 100 degrees.\n\
-Inputs: Day of year, hour of day, model level, latitude, longitude, solar zenith angle, upward shortwave flux, downward shortwave flux, pressure, temperature.\n\
+Inputs: Day of year, hour of day, model level, latitude, longitude, solar zenith angle, upward shortwave flux, downward shortwave flux, pressure, temperature.\
+Corresponds to same indices as preds and targets.\n\
 Targets: All strat-trop J rates.\n\
 Trees: {len(model.estimators_)}.\n\
 Max leaves per tree: 100000.\n\

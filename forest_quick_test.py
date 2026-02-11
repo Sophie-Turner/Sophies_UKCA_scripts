@@ -11,7 +11,8 @@ import functions as fns
 import file_paths as paths
 from sklearn.metrics import r2_score
 
-model_name = 'rf_fortran_poc_adjusted_sza'
+model_name = 'rf_scaled_targets'
+print()
 print(model_name)
   
 # Load the model data.
@@ -24,11 +25,11 @@ print(f'\nOverall average {con.r2} score = {r2}\n')
 # Print out the trop, strat and diff R2 scores for every J rate.  
 lows = []
 for rxn in range(len(targets[0])):
-  #name = idx_names.idx_names_trop[rxn + 15][2]
+  name = idx_names.idx_names_trop[rxn + 15][2]
   target = targets[:, rxn]
   pred = preds[:, rxn]
   r2 = round(r2_score(target, pred), 3)
-  print(f'Target J rate {rxn} {con.r2} = {r2}')
+  print(f'Target J rate {name} {con.r2} = {r2}')
   if r2 < 0.95:
     lows.append(rxn)
     

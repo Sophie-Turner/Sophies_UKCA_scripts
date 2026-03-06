@@ -48,7 +48,7 @@ def write_meta(name, path):
   
 
 # How many data points we want per chosen file of data.
-points = 1520000
+points = 152000
 
 # Prepare the new file and data array of 32 bit floats.
 name_ctl = 'fj30yr'

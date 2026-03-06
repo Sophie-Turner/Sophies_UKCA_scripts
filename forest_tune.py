@@ -16,21 +16,22 @@ from sklearn.ensemble import RandomForestRegressor
 def avg_data(x, y):
   # Average y data by unique x values.
   xs = np.unique(x)
-  y_avg = [y[x == val].mean() for val in xs]
+  #y_avg = [y[x == val].mean() for val in xs] # Mean.
+  y_avg = np.array([np.median(y[x == val]) for val in xs]) # Median.
   return xs, y_avg
 
 
 exp = 'Lvl cutoffs'
 print(f'\n{exp}')
 
-data_path = f'{paths.npy}/1982_45m.npy'
+data_path = f'{paths.data}/1982/1982_45m.npy'
 print('\nLoading data from', data_path)
 data = np.load(data_path)
 print(data.shape)
 
 # Problematic rxns.
-names = ['OCS', 'ISON', 'H2O', 'O2', 'N2O', 'MeCHO -> CH4', 'NO']
-js = [26, 30, 34, 41, 43, 46, 47]
+names = ['OCS', 'SO3', 'ISON', 'H2O', 'O2', 'O3', 'N2O', 'MeCHO -> CH4', 'NO']
+js = [26, 27, 30, 34, 41, 42, 43, 46, 47]
 
 '''
 # See where the problematic rxns start.
@@ -53,9 +54,8 @@ for i in range(len(js)):
     top = i+5
     portion = np.percentile(field, top)
     print(f'{top}th percentile = {portion}')
-  
-exit()
 '''
+
 # Indices of 1982 training data in full npy datatset.
 inputs_idx = [0,1,2,4,5,9,10,11,8,12]
 targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
@@ -67,13 +67,10 @@ inputs, targets = fns.in_out_swap(data, inputs_idx, targets_idx)
 in_train, in_test, out_train, out_test, i_test = fns.tts(inputs, targets, 0.05)
 
 # Problematic J rates.
-js = [4, 7, 11, 18, 20, 23, 24] 
+js = [4, 5, 7, 11, 18, 19, 20, 23, 24] 
 
 # Set stratospheric J rates to 0 below their important heights.
-#lvls = [61, 56, 56, 51, 50, 62, 55] # Lenient.
-#lvls = [60, 60, 60, 60, 60, 60, 60] # Simple.
-#lvls = [67, 64, 67, 65, 63, 68, 66] # Strict.
-lvls = [64, 61, 70, 61, 59, 61, 64] # Balanced.
+lvls = [65, 1, 62, 69, 63, 1, 62, 70, 65] 
 
 # Set problem J rates to 0 when the values are negligible.
 mags = [1e-5, 1e-4, 1e-6, 1e-9, 1e-7, 1e-6, 1e-6]
@@ -116,58 +113,56 @@ out_pred, _, _, _, _, r2 = fns.test(model, in_test, out_test)
 print(f'Overall average R2 score for all J rates: {r2}') 
 
 # Select problematic J rates: OCS, ISON, H2O, O2, N2O, MeCHO -> CH4, NO.
-js = [4, 7, 11, 18, 20, 23, 24]
-names = ['OCS', 'ISON', 'H2O', 'O2', 'N2O', 'MeCHO -> CH4', 'NO']
-'''
+js = [4, 5, 7, 11, 18, 19, 20, 23, 24]
+names = ['OCS', 'SO3', 'ISON', 'H2O', 'O2', 'O3', 'N2O', 'MeCHO -> CH4', 'NO']
+
 # Set dodgy tropospheric rates to 0.
 for i in range(len(js)):
   j = js[i]
   lvl = lvls[i]
   # Lower altitudes.
   out_pred[in_test[:, 2] < lvl, j] = 0.0
-'''
-'''
+
 # Select test area.
 print('Selecting test area model levels.')
 alt_max = 75
 out_test = out_test[in_test[:, 2] < alt_max]
 out_pred = out_pred[in_test[:, 2] < alt_max]
 in_test = in_test[in_test[:, 2] < alt_max]
-'''
+
 print('Making plots.')
-'''
+
 # Get R2 score of these problem targets
 # and plot vertical column averages.
 times = in_test[:, 0]
 for i in range(len(js)):
   j = js[i]
   name = names[i]
-  for lvl in range(50, 71):
-    preds = out_pred.copy()
-    preds[in_test[:, 2] < lvl, j] = 0.0
-    targets = out_test[:, j]
-    preds = preds[:, j]
-    r2 = round(r2_score(targets, preds), 3)
-    time, targets = avg_data(times, targets)
-    time, preds = avg_data(times, preds)
-    plt.plot(time, targets, label='Targets')
-    plt.plot(time, preds, label='Preds')
-    plt.title(f'{name} below model level 75 with L{lvl} mask. {con.r2} = {r2}')
-    plt.legend()
-    plt.xlabel(f'Day of year')
-    plt.ylabel(f'J rate')
-    plt.show()
-    #plt.savefig(f'{i}.png')
-    plt.close()
-'''    
-
+  lvl = lvls[i]
+  preds = out_pred.copy()
+  preds[in_test[:, 2] < lvl, j] = 0.0
+  targets = out_test[:, j]
+  preds = preds[:, j]
+  r2 = round(r2_score(targets, preds), 3)
+  plt.plot(times, preds, label='Preds')
+  plt.plot(times, targets, label='Targets')
+  plt.title(f'{name} below model level 75 with L{lvl} mask. {con.r2} = {r2}')
+  plt.legend()
+  plt.xlabel(f'Day of year')
+  plt.ylabel(f'J rate')
+  plt.show()
+  #plt.savefig(f'{i}.png')
+  plt.close()    
+ 
+print('Model levels:', np.min(inputs[:,2]), np.max(inputs[:,2])) 
+'''       
 # Get R2 score of these problem targets
 # and plot vertical column averages.
-for i in range(len(js)):
+#for i in range(len(js)):
   j = js[i]
   name = names[i]
   print(f'\n{name}')
-  for lvl in range(68, 71):
+  for lvl in range(61, 64):
     preds = out_pred.copy()
     targets = out_test.copy()
     inputs = in_test.copy()
@@ -183,7 +178,7 @@ for i in range(len(js)):
     preds = preds[:, j]
     r2 = round(r2_score(targets, preds), 3)
     print(r2)
-    '''
+    
     time, targets = avg_data(times, targets)
     time, preds = avg_data(times, preds)
     plt.plot(time, targets, label='Targets')
@@ -194,6 +189,6 @@ for i in range(len(js)):
     plt.ylabel(f'J rate')
     plt.show()
     #plt.savefig(f'{i}.png')
-    plt.close()    
-    '''
+    plt.close()     
+'''    
 print(f'\n{exp}\n')

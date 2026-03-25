@@ -169,7 +169,7 @@ for i in range(6, len(data_fj)):
 # and CMIP6 standard deviation, by time and latitude.
 
 # For every output,  
-# make a plot of CMIP6 standard deviation, Fast-J and ML values over time. 
+# make a plot of Fast-J and ML values over time. 
 for i in range(17, len(data_fj)):
   item_fj = data_area_fj[i]
   item_ml = data_area_ml[i]

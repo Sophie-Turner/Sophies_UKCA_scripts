@@ -47,7 +47,7 @@ def plot_flame(layer_0, layer_1, layer_2, ukca_max, scheme):
 # Longest UKCA can take.
 ukca_max = 309.24
 
-# Fast-JX timings - name, start time, time taken, colour.
+# Fast-JX timings: name, start time, time taken, colour.
 
 # How long UKCA takes.
 fj_layer_0 = ("UKCA", 0, 309.24, "yellow")
@@ -66,7 +66,7 @@ fj_layer_1 = [
 # Photolysis scheme.
 fj_layer_2 = ("Fast-JX photolysis", 12.2844, 46.189, "red")
 
-# Random forest timings - name, start time, time taken, colour.
+# Random forest timings: name, start time, time taken, colour.
 
 # How long UKCA takes.
 ml_layer_0 = ("UKCA", 0, 269.5503, "yellow")

@@ -32,8 +32,9 @@ def sample_test_set(i, files, points, data_new, ids):
   
   
 def get_date(file_path):
-  #date = file_path[-8:-4]
-  date = file_path[-12:-4]
+  date = file_path[-8:-4]
+  print(date)
+  #date = file_path[-12:-4]
   return date
   
   
@@ -48,11 +49,11 @@ def write_meta(name, path):
   
 
 # How many data points we want per chosen file of data.
-points = 152000
+points = 51667
 
 # Prepare the new file and data array of 32 bit floats.
-name_ctl = 'fj30yr'
-name_test = 'ml30yr_masked'
+name_ctl = 'fj30yr_not'
+name_test = 'ml1mon_masked_tuned'
 path_data_ctl = f'{paths.npy}/{name_ctl}.npy'
 path_meta_ctl = f'{paths.npy}/{name_ctl}_metadata.txt'
 path_data_test = f'{paths.npy}/{name_test}.npy'
@@ -69,7 +70,7 @@ if os.path.exists(path_data_ctl) or os.path.exists(path_data_test):
 
 # Get the npy files in the dataset.
 #files_ctl = sorted(glob.glob(f'{paths.data}/{name_ctl}/???????.npy'))
-files_test = sorted(glob.glob(f'{paths.data}/{name_test}/???????.npy'))
+files_test = sorted(glob.glob(f'{paths.data}/{name_test}/????????.npy'))
 '''
 # Make sure both datasets have the same date files and no extras.
 dates_ctl = {get_date(f) for f in files_ctl}

@@ -217,7 +217,6 @@ def split_pressure(data):
 def sample(data, size=None):
   '''Make a smaller dataset by randomly sampling the data, uniformly.
   Choose a big enough size to capture sufficient tropospheric density.
-  To do: use a better function than random uniform sampling.
   data: np array of dataset, 1D or 2D of shape (features, samples).
   size: number of data points desired. Leave empty for auto (10%).
   '''

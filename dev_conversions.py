@@ -5,7 +5,7 @@ Contact: st838@cam.ac.uk.
 Perform all useful data conversions from UM format to format useful for ML. Conversions are:
 Altitude from a proportion of the top level to kilometres,
 Altitude from levels based at sea-level to altitude with orography,
-Longitude from +=180 degrees to 360 degree scale,
+Longitude from +-180 degrees to 360 degree scale,
 Solar zenith angle from cosine of radians to degrees,
 Solar zenith angle from surface-level to all levels scaled by height and refraction,
 New data for summed cloud in columns above each grid box.

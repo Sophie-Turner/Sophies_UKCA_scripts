@@ -15,7 +15,7 @@ from sklearn.metrics import r2_score
 
 
 def compare_sza_scaling(model_name, title):
-  '''Look at performance of random forest trained of surface level, 
+  '''Look at performance of random forest trained on surface level, 
   vertically scaled or pressure scaled solar zenith angle (SZA).
   model_name (string): the name of the random forest to use as it is named in its directory.
   title (string): description of type of SZA scaling used.

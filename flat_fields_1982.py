@@ -99,11 +99,13 @@ def pad_dims(field, out_path):
   np.save(out_path, dims_table)    
 
 
+data_dir = 'ml1day_masked_noH2O' 
+
 # Input files. 
-pp_files = sorted(glob.glob(f'{paths.data}/ml1yr_masked/dv???a.px????????.pp'))
+pp_files = sorted(glob.glob(f'{paths.data}/{data_dir}/dv???a.px????????.pp'))
 
 # File path for padded dims to match flattened fields.
-dims_path = f'{paths.data}/ml1yr/dims.npy' 
+dims_path = f'{paths.data}/{data_dir}/dims.npy' 
 
 # Make the dims if not already available.
 if not os.path.exists(dims_path):
@@ -123,7 +125,7 @@ missing = []
 for file_i in range(len(pp_files)):
   # Name of the new file to be saved.
   pp_file = pp_files[file_i]
-  npy_file = f'{paths.data}/ml1yr_masked/{pp_file[-11:-3]}.npy'
+  npy_file = f'{paths.data}/{data_dir}/{pp_file[-11:-3]}.npy'
   is_complete = True
   
   # Don't waste time overwriting existing files.

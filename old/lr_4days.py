@@ -71,7 +71,7 @@ in_train, in_test = np.swapaxes(in_train, 0, 1), np.swapaxes(in_test, 0, 1)
 # Standardisation (optional).
 scaler = StandardScaler()
 in_train = scaler.fit_transform(in_train)
-in_test = scaler.fit_transform(in_test)
+in_test = scaler.transform(in_test)
 
 # Test all the targets.
 for target_idx in [HCHOm, NO2, O3, H2O2]:  

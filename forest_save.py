@@ -22,7 +22,7 @@ scale_inputs = False
 scale_targets = False
 
 # File paths.
-data_path = f'{paths.npy}/1982_182m_fixed_days.npy'
+data_path = f'{paths.npy}/1982_182m.npy'
 out_name = 'rf_problems_J_inputs_1982'
 out_dir = f'{paths.mod}/{out_name}'
 out_path = f'{out_dir}/{out_name}'
@@ -54,11 +54,8 @@ end = time.time()
 print(f'Loading the data took {round(end-start)} seconds.')
 
 # Indices of 1982 training data in full npy datatset.
-#inputs_idx = list(range(13))
-#targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
-inputs_idx = list(range(13)) + [17, 18, 19, 23, 28, 31, 32, 33, 35, 36, 38, 39, 40, 44, 45, 48] # All-alt Js.
-# OCS, SO3, ISON, H2O, HNO3, O2, O3, N2O, MeCHO, NO.
-targets_idx = [26, 27, 30, 34, 37, 41, 42, 43, 46, 47] # High-alt Js.
+inputs_idx = list(range(13))
+targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
 
 # Set Strat-only targets to 0 below model lvl 60.
 # Problem J-values are OCS, ISON, H2O, O2, N2O, MeCHO -> CH4 and NO.

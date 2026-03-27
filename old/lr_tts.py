@@ -76,7 +76,7 @@ for target_idx in [NO2]:
   # Standardisation (optional).
   scaler = StandardScaler()
   in_train = scaler.fit_transform(in_train)
-  in_test = scaler.fit_transform(in_test)
+  in_test = scaler.transform(in_test)
 
   # Find suitable size of Lasso regularisation const.
   avg = np.mean(out_train)

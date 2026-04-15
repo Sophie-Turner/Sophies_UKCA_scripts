@@ -52,8 +52,8 @@ def write_meta(name, path):
 points = 51667
 
 # Prepare the new file and data array of 32 bit floats.
-name_ctl = 'fj30yr_not'
-name_test = 'ml1mon_masked_tuned'
+name_ctl = 'fj1yr'
+name_test = 'ml1yr'
 path_data_ctl = f'{paths.npy}/{name_ctl}.npy'
 path_meta_ctl = f'{paths.npy}/{name_ctl}_metadata.txt'
 path_data_test = f'{paths.npy}/{name_test}.npy'
@@ -69,16 +69,16 @@ if os.path.exists(path_data_ctl) or os.path.exists(path_data_test):
     exit(1)
 
 # Get the npy files in the dataset.
-#files_ctl = sorted(glob.glob(f'{paths.data}/{name_ctl}/???????.npy'))
+files_ctl = sorted(glob.glob(f'{paths.data}/{name_ctl}/???????.npy'))
 files_test = sorted(glob.glob(f'{paths.data}/{name_test}/????????.npy'))
-'''
+
 # Make sure both datasets have the same date files and no extras.
 dates_ctl = {get_date(f) for f in files_ctl}
 dates_test = {get_date(f) for f in files_test}
 matched = dates_ctl & dates_test
 files_ctl = [f for f in files_ctl if get_date(f) in matched]
 files_test = [f for f in files_test if get_date(f) in matched]
-'''
+
 # Open the 1st file to get length for random numbers.
 print('Getting data sizes for random indices.')
 data = np.load(files_test[0])
@@ -89,7 +89,7 @@ del data
 for i in range(len(files_test)):
   start = time.time()
   # Make sure both datasets get the same indices sampled.
-  ids = con.rng.integers(0, fullsize, points)
+  ids = np.linspace(0, fullsize, points, dtype=np.int32)
   ids = np.sort(ids)  
   #print(f'Processing file {i+1} of {len(matched)} in control dataset.')
   #data_ctl = sample_test_set(i, files_ctl, points, data_ctl, ids)

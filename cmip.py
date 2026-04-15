@@ -24,7 +24,7 @@ def pad_dim(dim, rep, stride, table):
   return(table)
 
 
-name = 'o3_CNRM'
+name = 'o3_NCAR'
 print()
 print(name)
 cmip_file = f'{paths.data}/cmip/{name}*.nc'

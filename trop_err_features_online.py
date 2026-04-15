@@ -26,7 +26,7 @@ path_fj = f'{paths.data}/fj1yr/19820102.npy'
 path_ml = f'{paths.data}/ml1yr/19820102.npy'
 #path_ml = f'{paths.npy}/ml1mon.npy'
 # ML dataset, masked.
-path_mask = f'{paths.data}/ml1day_masked_noH2O/19820102.npy'
+path_mask = f'{paths.data}/ml1yr_masked/19820102.npy'
 #path_mask = f'{paths.npy}/ml1mon_masked_tuned.npy'
 
 # Names, info & units of outputs in dataset order.
@@ -43,49 +43,49 @@ names = [
 	 ['model level', '', ''],
 	 ['hybrid height', '', '/ proportion of top'],
 	 ['latitude', '', '/ deg N'],
-	 ['longitude', '', '/ deg E'],
+	 ['longitude', '', '/ deg E'],            # 5
          ['Shortwave heating rates', '', ''], 
 	 [f'O{con.sub3}', mmr, kg], 
 	 ['NO', mmr, kg], 
 	 ['Peroxyacetyl nitrate', mmr, kg], 
-	 ['Cl', mmr, kg], # 10
+	 ['Cl', mmr, kg],                          # 10
 	 [f'N{con.sub2}O', mmr, kg], 
 	 ['OH', mmr, kg], 
 	 [f'HO{con.sub2}', mmr, kg], 
 	 [f'H{con.sub2}O', mmr, kg], 
-	 [f'O{con.subx} production', '', mols], 
-	 [f'CH{con.sub4} lifetime', '', mols], 
+	 [f'O{con.subx} production', '', mols],   # 15
+	 [f'CH{con.sub4} + OH reaction flux', '', mols], 
 	 [f'O{con.sub3} column', '', du],
 	 ['HCHO (radical reaction)', j, pers], 
          ['HCHO (molecular reaction)', j, pers],
-	 ['MeCOCHO', j, pers], # 20 
+	 ['MeCOCHO', j, pers],                     # 20 
 	 [f'Cl{con.sub2}O{con.sub2}', j, pers],
          ['OCS', j, pers], 
 	 [f'SO{con.sub3}', j, pers], 
 	 [f'MeONO{con.sub2}', j, pers], 
-	 ['Isoprene nitrate', j, pers], 
+	 ['Isoprene nitrate', j, pers],           # 25
 	 [f'MeCHO {con.to} MeOO', j, pers], 
          ['Propanal', j, pers], 
 	 [f'NO{con.sub3}', j, pers], 
 	 [f'H{con.sub2}O', j, pers], 
-	 ['HOBr', j, pers], # 30
+	 ['HOBr', j, pers],                        # 30
 	 ['HOCl', j, pers], 
 	 [f'HONO{con.sub2}', j, pers], 
 	 [f'HO{con.sub2}NO{con.sub2}', j, pers], 
 	 [f'H{con.sub2}O{con.sub2}', j, pers], 
-	 ['MeOOH', j, pers], 
+	 ['MeOOH', j, pers],                      # 35
 	 [f'O{con.sub2}', j, pers],
 	 [f'O{con.sub3}', j, pers], 
 	 [f'N{con.sub2}O', j, pers], 
 	 ['Methacrolein', j, pers], 
-	 ['MACROOH', j, pers], # 40
+	 ['MACROOH', j, pers],                     # 40
 	 [f'MeCHO {con.to} CH{con.sub4}', j, pers],
 	 ['NO', j, pers], 
-	 [f'NO{con.sub2}', j, pers] 
+	 [f'NO{con.sub2}', j, pers]                # 43
 	]
 
 # Load both datasets.
-print('\nLoading data.')
+print('\nLoading data from', path_mask)
 data_fj = np.load(path_fj)
 data_ml = np.load(path_ml)
 data_mask = np.load(path_mask)
@@ -106,13 +106,13 @@ data_fj_sample = data_fj[:, idx_fj]
 data_ml_sample = data_ml[:, idx_ml]
 '''
 # Problematic items to test.
-#problems = [12, 13, 15, 16, 17, 22, 23, 25, 29, 36, 37, 38, 41, 42]
-problems = [12, 13, 29]
+problems = [7, 12, 13, 15, 16, 17, 22, 23, 25, 29, 36, 37, 38, 41, 42]
+#problems = [12, 13, 29]
 for i in problems:
   item_name = names[i] 
   
   # Spatial and temporal features.
-  for j in range(1,4):
+  for j in range(4):
     feature_name = names[j]
  
     # Line plots of averages.
@@ -125,14 +125,16 @@ for i in problems:
     # Make plot.
     fig, ax = plt.subplots()
     ax.plot(features_ml, item_avg_ml, color='blue', label=f'UM with random forest photolysis.')
-    ax.plot(features_mask, item_avg_mask, color='green', label=f'UM with random forest photolysis, without water.')
+    ax.plot(features_mask, item_avg_mask, color='green', label=f'UM with random forest photolysis, masked.')
     ax.plot(features_fj, item_avg_fj, color='orange', label=f'UM with Fast-JX photolysis.')
     ax.set_title(f'Mean {item_name[0]} {item_name[1]} by {feature_name[0]} in a 1-day simulation')
     ax.set_xlabel(f'{feature_name[0]} {feature_name[1]} {feature_name[2]}')  
     ax.set_ylabel(f'{item_name[0]} {item_name[1]} {item_name[2]}')
     ax.legend()
     plt.show()
+    #plt.savefig(f'/scratch/st838/netscratch/analysis/online_masked_tuned_global/{item_name[0]} {feature_name[0]} 3.png')
     plt.close()
+    
     '''
     # Scatter plots of instantaneous points.
     item_fj, item_ml = data_fj_sample[i], data_ml_sample[i] 

@@ -1,6 +1,6 @@
 '''
 Compare the effect on chemistry of random forest photolysis 
-vs the original Fast-JX photolysis scheme in UKCA.
+vs the original Fast-JX photolysis scheme online in UKCA.
 '''
 
 import numpy as np
@@ -10,7 +10,7 @@ import functions as fns
 import file_paths as paths
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from sklearn.metrics import r2_score
+from sklearn.metrics import r2_score, mean_squared_error
 
 
 def round_digits(num, sig_figs=3):
@@ -37,13 +37,13 @@ def avg_data(x, y):
 
 
 # Experiment.
-run = '30'
+run = '1'
 
 # Fast-JX dataset (control).
 path_fj = f'{paths.npy}/fj{run}yr.npy'
 
 # ML-predicted photolysis dataset.
-path_ml = f'{paths.npy}/ml{run}yr_masked.npy'
+path_ml = f'{paths.npy}/ml{run}yr.npy'
 
 # Where to save the plots.
 exp = 'online_global_30yr_masked'
@@ -111,17 +111,28 @@ print(data_fj.shape, data_ml.shape)
 #alt_min, alt_max = 0.29, 0.47
 # Surface. 0-1 km.
 #alt_min, alt_max = 0, 0.0018 
-# The whole atmosphere.
-alt_min, alt_max = 0, 1
 # The equator. ~ 20N to 20S.
 #lat_min, lat_max = -20, 20
 # South pole. 
 #lat_min, lat_max = -90, -60
-# The whole world.
-lat_min, lat_max = -100, 100
-data_area_fj = get_area(data_fj, alt_min, alt_max, lat_min, lat_max)
-data_area_ml = get_area(data_ml, alt_min, alt_max, lat_min, lat_max)
-print(data_area_fj.shape, data_area_ml.shape)
+#data_area_fj = get_area(data_fj, alt_min, alt_max, lat_min, lat_max)
+#data_area_ml = get_area(data_ml, alt_min, alt_max, lat_min, lat_max)
+#print(data_area_fj.shape, data_area_ml.shape)
+
+# Print accuracy metrics.
+for i in range(18, len(data_fj)):
+  item_fj = data_fj[i]
+  item_ml = data_ml[i]
+  r2 = r2_score(item_fj, item_ml)
+  print(r2)
+  
+print()
+for i in range(18, len(data_fj)):
+  item_fj = data_fj[i]
+  item_ml = data_ml[i]
+  mse = mean_squared_error(item_fj, item_ml)
+  print(mse)  
+
 '''
 # For every output, make a correlation plot of ML and Fast-JX.
 for i in range(6, len(data_fj)):
@@ -163,7 +174,7 @@ for i in range(6, len(data_fj)):
   ax.set_ylabel(ylab)
   plt.savefig(f'{fig_path}/{fullname[0]}_correlation.png')
   plt.close()
-'''
+
 # For every output, 
 # make a plot of Fast-JX, difference between ML & Fast-JX, 
 # and CMIP6 standard deviation, by time and latitude.
@@ -178,19 +189,18 @@ for i in range(17, len(data_fj)):
   fullname = names[i-6]
   print(fullname[0]) 
   title = f'Monthly mean {fullname[0]} {fullname[1]} in a 30-year simulation'
-  '''
+  
   # Put R2 score on plot if it's a J rate.
   label_ml = '' 
   if fullname[1] == j:
     r2_ml = round(r2_score(item_fj, item_ml), 3)
     if r2_ml >= 0:
       label_ml = f' Correlation coefficient = {r2_ml}'
-  ''' 
-  '''
+  
   # Get day (hourly or daily datasets).
   time_fj = data_area_fj[0]
   time_ml = data_area_ml[0]
-  '''
+  
   # Get years and months as dates (monthly datasets).
   years_fj, years_ml = data_area_fj[0].astype(int), data_area_ml[0].astype(int)
   months_fj, months_ml = data_area_fj[1].astype(int), data_area_ml[1].astype(int)
@@ -220,3 +230,4 @@ for i in range(17, len(data_fj)):
   plt.close()
   
   # Put margins around the CMIP6 line.      
+'''

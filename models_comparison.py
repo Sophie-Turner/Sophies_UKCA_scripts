@@ -20,6 +20,8 @@ from sklearn.preprocessing import StandardScaler as scaler
 from sklearn.model_selection import train_test_split as tts
 from sklearn.ensemble import HistGradientBoostingRegressor as hgbr
 
+print('\nWith input scaling.')
+
 # Names, info & units of data of interest.
 j = 'photolysis rate coefficient' 
 pers = f'/ {con.pers}' 
@@ -131,29 +133,32 @@ data = np.load(data_path)
 print(data.shape)	
 	
 # Reduce data size.
-#data = fns.sample(data, 15_000_000)	
+data = fns.sample(data, 15_000_000)	
 	
 # Inputs and targets.
 inputs_idx = list(range(13))
-targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
+#targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
+targets_idx = [17,26,33,34,39,43,48]
 inputs, targets = fns.in_out_swap(data, inputs_idx, targets_idx)
 
 # Free up some memory.
 del data
 
-# 98/2 train test split. 
+# 98/2 train test split.
+print('Making train-test split.') 
 in_train, in_test, out_train, out_test = tts(inputs, targets, test_size=0.02, train_size=0.98)
 
 # Input standardisation.
+print('Fitting and saving scaling functions.')
 in_scaler = scaler()
 in_train_scaled = in_scaler.fit_transform(in_train) 
 in_test_scaled = in_scaler.transform(in_test)
 
 # Save scaler for every model that uses it.
-joblib.dump(in_scaler, f'{paths.mod}/ols/ols_in_scaler.pkl')
-joblib.dump(in_scaler, f'{paths.mod}/lasso/lasso_in_scaler.pkl')
-joblib.dump(in_scaler, f'{paths.mod}/svm/svm_in_scaler.pkl')
-joblib.dump(in_scaler, f'{paths.mod}/nn/nn_in_scaler.pkl')
+#joblib.dump(in_scaler, f'{paths.mod}/ols/ols_in_scaler.pkl')
+#joblib.dump(in_scaler, f'{paths.mod}/lasso/lasso_in_scaler.pkl')
+#joblib.dump(in_scaler, f'{paths.mod}/svm/svm_in_scaler.pkl')
+#joblib.dump(in_scaler, f'{paths.mod}/nn/nn_in_scaler.pkl')
 # Free up some memory.
 del in_scaler
 
@@ -166,7 +171,7 @@ out_train_scaled = np.log(out_train + eps)
 name = 'ordinary least squares'
 print(f'\n\n{name}:')
 model = linear_model.LinearRegression()
-model, preds = train_test(model, in_train_scaled, out_train, in_test_scaled)
+model, preds = train_test(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
 save_model_data(model, in_test, out_test, preds, 'ols')
@@ -181,23 +186,26 @@ save_model_data(model, in_test, out_test, preds, 'tree')
 
 name = 'random forest'
 print(f'\n\n{name}:\n')
-model = RandomForestRegressor(criterion='squared_error', n_estimators=20, n_jobs=20, max_features=0.2, max_samples=0.1, max_leaf_nodes=100000, random_state=con.seed)
+model = RandomForestRegressor(criterion='squared_error', n_estimators=20, n_jobs=20, max_features=0.2, 
+                              max_samples=0.1, max_leaf_nodes=100000, random_state=con.seed)
 model, preds = train_test(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
+save_model_data(model, in_test, out_test, preds, 'forest')
 
 name = 'LASSO'
 print(f'\n\n{name}:\n')
 # Find suitable size of Lasso regularisation const.
-#avg = np.mean(out_train)
-#e = np.floor(np.log10(avg)) - 1
-#reg = 10**e
-model = linear_model.Lasso(alpha=1e-3, tol=1e-4)
-model, preds = train_test(model, in_train_scaled, out_train, in_test_scaled)
+avg = np.mean(out_train)
+e = np.floor(np.log10(avg)) - 1
+reg = 10**e
+model = linear_model.Lasso(alpha=reg)
+#model = linear_model.Lasso(alpha=1e-3, tol=1e-4)
+model, preds = train_test(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
 save_model_data(model, in_test, out_test, preds, 'lasso')
-'''
+
 name = 'neural network'
 print(f'\n\n{name}:\n')
 model = MLPRegressor(hidden_layer_sizes=(100,100,50,50))
@@ -215,13 +223,65 @@ model, preds = train_test(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)	
 save_model_data(model, in_test, out_test, preds, 'gbm')
-
+'''
 name = 'support vector machine'
 print(f'\n\n{name}:\n')
-# Reduce data size.
-data = fns.sample(data, 15_000_000)
-model = MultiOutputRegressor(LinearSVR(random_state=con.seed))
-preds = train_test(model, in_train_scaled, out_train, in_test_scaled)
+model = MultiOutputRegressor(LinearSVR(max_iter=500, verbose=1), n_jobs=1)
+model, preds = train_test(model, in_train_scaled, out_train, in_test_scaled)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
 save_model_data(model, in_test, out_test, preds, 'svm')
+'''
+# Load all the preds.
+models = ['ols', 'lasso', 'tree', 'gbm', 'forest', 'nn'] 
+names = ['OLS', 'LASSO', 'decision tree', 'GBM', 'random forest', 'neural network']
+colours = ['tab:purple', 'tab:green', 'tab:orange', 'tab:red', 'tab:pink', 'tab:cyan']
+
+# Independent data.
+target = out_test[:, 19].squeeze()
+lvl = in_test[:, 2].squeeze()
+lvls, target_avg = avg_data(lvl, target)
+plt.plot(target_avg, lvls, color='black', linewidth=4, label='Ozone J-values from UKCA')
+
+# Plot all models' preds on one graph.
+for i in range(len(models)):
+  model = models[i]
+  name = names[i]
+  colour = colours[i]
+  inputs, _, preds = fns.load_model_data(model)
+  lvl = inputs[:, 2].squeeze()
+  pred = preds[:, 19].squeeze()
+  _, pred_avg = avg_data(lvl, pred)
+  plt.plot(pred_avg, lvls, color=colour, label=f'Ozone J-values from {name}') 
+  
+plt.xlabel(f'Ozone photolysis rate coefficient {con.pers}')
+plt.ylabel('Vertical model level')
+plt.title('Mean ozone photolysis rate coefficient profiles from different models')
+plt.legend()
+plt.show()
+plt.close()
+
+# Independent data.
+target = out_test[:, 16].squeeze()
+day = in_test[:, 0].squeeze()
+days, target_avg = avg_data(day, target)
+plt.plot(days, target_avg, color='black', linewidth=4, label=f'H{con.sub2}O{con.sub2} J-values from UKCA')
+
+# Plot all models' preds on one graph.
+for i in range(len(models)):
+  model = models[i]
+  name = names[i]
+  colour = colours[i]
+  inputs, _, preds = fns.load_model_data(model)
+  day = inputs[:, 0].squeeze()
+  pred = preds[:, 16].squeeze()
+  _, pred_avg = avg_data(day, pred)
+  plt.plot(days, pred_avg, color=colour, label=f'H{con.sub2}O{con.sub2} J-values from {name}') 
+  
+plt.xlabel('Day of year')  
+plt.ylabel(f'H{con.sub2}O{con.sub2} photolysis rate coefficient {con.pers}')
+plt.title(f'Daily mean H{con.sub2}O{con.sub2} photolysis rate coefficients from different models')
+plt.legend()
+plt.show()
+plt.close()
+'''

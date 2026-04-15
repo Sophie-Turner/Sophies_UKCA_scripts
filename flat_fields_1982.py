@@ -99,7 +99,7 @@ def pad_dims(field, out_path):
   np.save(out_path, dims_table)    
 
 
-data_dir = 'ml1day_masked_noH2O' 
+data_dir = 'ml1day_noH2O' 
 
 # Input files. 
 pp_files = sorted(glob.glob(f'{paths.data}/{data_dir}/dv???a.px????????.pp'))

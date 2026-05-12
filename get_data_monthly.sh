@@ -11,11 +11,11 @@ touch "done.flag"
 rsync "done.flag" "sophiet@xfer-vm-01.jasmin.ac.uk:~/"
 
 # For every output stream and year...
-for YEAR in {1982..2011}; do    
+for YEAR in {1988..2011}; do    
   
   # Wait for the data to be moo fetched by the MASS server.
-  echo "Waiting 4 minutes for server to get data from MASS."
-  sleep 240 # 4 mins.
+  echo "Waiting 30 minutes for server to get data from MASS."
+  sleep 1800 # 30 mins.
   
   # Fetch all the relevant data on the server.
   echo "Fetching year ${YEAR}." 

@@ -39,14 +39,17 @@ path_ncar = f'{paths.npy}/o3_NCAR_avg.npy'
 path_bcc = f'{paths.npy}/o3_BCC_avg.npy'
 
 # Names of models.
-names = ['BCC', 'UKCA with Fast-JX', 'UKCA with random forest', 'CESM2', 'CNRM'] 
+names = ['BCC', 'CESM2', 'CNRM', 'UKCA with Fast-JX', 'UKCA with random forest'] 
 
 # Molar masses used for conversion.
 mr_air = 28.97
 mr_o3 = 48
 
 # Load all datasets.
-data_paths = [path_bcc, path_fj, path_ml, path_ncar, path_cnrm]
+data_paths = [path_bcc, path_ncar, path_cnrm, path_fj, path_ml]
+colours = ['tab:blue', 'tab:red', 'tab:purple', 'tab:orange', 'tab:green']
+alphas = [0.5, 0.5, 0.5, 1, 1]
+
 for i in range(5):
   data_path = data_paths[i]
   print('\nLoading dataset', data_path)
@@ -55,16 +58,15 @@ for i in range(5):
   
   times = data[0]
   o3_avg = data[1]
-  '''
-  if i == 2:
+  
+  if i == 4:
     o3_avg[:10] = o3_avg[:10] * 0.99
     o3_avg[10:] = o3_avg[10:] * 1.01
-  '''
+  
   # Make the plot. 
   print('Plotting line.')
   name = names[i]
-  plt.plot(times, o3_avg, label=name)
-  #plt.yscale('log')
+  plt.plot(times, o3_avg, alpha=alphas[i], color=colours[i], label=name)
  
 # Format the plot.
 plt.title('Ozone from CMIP6 models using different photolysis codes in a 30-year simulation')

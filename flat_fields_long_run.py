@@ -76,7 +76,7 @@ def pad_dims(field, out_path):
 # Input files. 
 pp_files = glob.glob(f'{paths.data}/ml30yr_masked/dw370a.px???????.pp')
 # File path for padded dims to match flattened fields.
-dims_path = f'{paths.data}/ml30yr_masked/dims.npy' 
+dims_path = f'{paths.data}/ml30yr/dims.npy' 
 
 # Make the dims if not already available.
 if not os.path.exists(dims_path):

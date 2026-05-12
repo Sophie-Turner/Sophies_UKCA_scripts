@@ -320,14 +320,17 @@ def train(in_train, out_train):
 def sMAPE(out_test, out_pred):
   '''Compute the symmetric mean absolute percentage error.
   Like MAPE but handles values close to zero better.
-  test: array of test targets. pred: array of prediction outputs. 
+  out_test: array of test targets. out_pred: array of prediction outputs. 
   '''
   warnings.filterwarnings('ignore') 
   n = len(out_test)
   diffs = 0
+  n_nonzero = 0
   for i in range(n):
-    diffs += (abs(out_test[i] - out_pred[i])) / (out_test[i] + out_pred[i])
-  smape = (100 / n) * diffs 
+    if out_test[i] > 0:
+      diffs += (abs(out_test[i] - out_pred[i])) / (out_test[i] + out_pred[i])
+      n_nonzero += 1
+  smape = (100 / n_nonzero) * diffs 
   return(smape)
   
   

@@ -20,16 +20,17 @@ from sklearn.preprocessing import StandardScaler as scaler
 from sklearn.model_selection import train_test_split as tts
 from sklearn.ensemble import HistGradientBoostingRegressor as hgbr
 
-print('\nWith input scaling.')
+print('\nWithout scaling.')
 
 # Names, info & units of data of interest.
 j = 'photolysis rate coefficient' 
 pers = f'/ {con.pers}' 
 
-names = [[f'NO{con.sub3}', j, pers], 
+names = [[f'NO{con.sub2}', j, pers],
+         [f'NO{con.sub3}', j, pers], 
          [f'H{con.sub2}O', j, pers]]
 
-idxs = [10, 11]
+idxs = [6, 2, 3]
 
   
 def train_test(model, in_train, out_train, in_test):
@@ -85,7 +86,7 @@ def get_metrics(in_test, out_test, preds):
   print('\nEquator:')
   print_metrics(out_test_portion, preds_portion) 
   # NO2 and NO3.
-  for i in range(2):
+  for i in range(3):
     name = names[i]
     item_fj = out_test[:, idxs[i]]
     item_ml = preds[:, idxs[i]]
@@ -133,12 +134,13 @@ data = np.load(data_path)
 print(data.shape)	
 	
 # Reduce data size.
-data = fns.sample(data, 15_000_000)	
+#data = fns.sample(data, 15_000_000)	
 	
 # Inputs and targets.
 inputs_idx = list(range(13))
-#targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
-targets_idx = [17,26,33,34,39,43,48]
+targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
+# HCHOr, OCS, NO3, H2O, H2O2, O3, NO2
+#targets_idx = [17,26,33,34,39,42,48] 
 inputs, targets = fns.in_out_swap(data, inputs_idx, targets_idx)
 
 # Free up some memory.
@@ -223,25 +225,25 @@ model, preds = train_test(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)	
 save_model_data(model, in_test, out_test, preds, 'gbm')
-'''
+
 name = 'support vector machine'
 print(f'\n\n{name}:\n')
 model = MultiOutputRegressor(LinearSVR(max_iter=500, verbose=1), n_jobs=1)
-model, preds = train_test(model, in_train_scaled, out_train, in_test_scaled)
+model, preds = train_test(model, in_train, out_train, in_test)
+save_model_data(model, in_test, out_test, preds, 'svm')
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
-save_model_data(model, in_test, out_test, preds, 'svm')
 '''
 # Load all the preds.
-models = ['ols', 'lasso', 'tree', 'gbm', 'forest', 'nn'] 
-names = ['OLS', 'LASSO', 'decision tree', 'GBM', 'random forest', 'neural network']
-colours = ['tab:purple', 'tab:green', 'tab:orange', 'tab:red', 'tab:pink', 'tab:cyan']
+models = ['ols', 'lasso',  'svm', 'tree', 'gbm', 'forest', 'nn'] 
+names = ['OLS', 'LASSO', 'SVM', 'decision tree', 'GBM', 'random forest', 'neural network']
+colours = ['tab:purple', 'tab:green', 'tab:gray', 'tab:orange', 'tab:red', 'tab:pink', 'tab:cyan']
 
 # Independent data.
-target = out_test[:, 19].squeeze()
+target = out_test[:, -1].squeeze()
 lvl = in_test[:, 2].squeeze()
 lvls, target_avg = avg_data(lvl, target)
-plt.plot(target_avg, lvls, color='black', linewidth=4, label='Ozone J-values from UKCA')
+plt.plot(target_avg, lvls, color='black', linewidth=4, label=f'NO{con.sub2} J-values from UKCA')
 
 # Plot all models' preds on one graph.
 for i in range(len(models)):
@@ -250,22 +252,26 @@ for i in range(len(models)):
   colour = colours[i]
   inputs, _, preds = fns.load_model_data(model)
   lvl = inputs[:, 2].squeeze()
-  pred = preds[:, 19].squeeze()
+  if i == 2:
+    pred = preds[:, -1].squeeze() 
+  else: 
+    pred = preds[:, -1].squeeze()
   _, pred_avg = avg_data(lvl, pred)
-  plt.plot(pred_avg, lvls, color=colour, label=f'Ozone J-values from {name}') 
+  plt.plot(pred_avg, lvls, color=colour, label=f'NO{con.sub2} J-values from {name}') 
+  plt.xscale('log')
   
-plt.xlabel(f'Ozone photolysis rate coefficient {con.pers}')
+plt.xlabel(f'NO{con.sub2} photolysis rate coefficient {con.pers}')
 plt.ylabel('Vertical model level')
-plt.title('Mean ozone photolysis rate coefficient profiles from different models')
+plt.title(f'Mean NO{con.sub2} photolysis rate coefficient profiles from different models')
 plt.legend()
 plt.show()
 plt.close()
 
 # Independent data.
-target = out_test[:, 16].squeeze()
+target = out_test[:, -1].squeeze()
 day = in_test[:, 0].squeeze()
 days, target_avg = avg_data(day, target)
-plt.plot(days, target_avg, color='black', linewidth=4, label=f'H{con.sub2}O{con.sub2} J-values from UKCA')
+plt.plot(days, target_avg, color='black', linewidth=4, label=f'NO{con.sub2} J-values from UKCA')
 
 # Plot all models' preds on one graph.
 for i in range(len(models)):
@@ -274,14 +280,16 @@ for i in range(len(models)):
   colour = colours[i]
   inputs, _, preds = fns.load_model_data(model)
   day = inputs[:, 0].squeeze()
-  pred = preds[:, 16].squeeze()
+  if i == 2:
+    pred = preds[:, -1].squeeze()
+  else:
+    pred = preds[:, -1].squeeze()
   _, pred_avg = avg_data(day, pred)
-  plt.plot(days, pred_avg, color=colour, label=f'H{con.sub2}O{con.sub2} J-values from {name}') 
+  plt.plot(days, pred_avg, color=colour, label=f'NO{con.sub2} J-values from {name}') 
   
 plt.xlabel('Day of year')  
-plt.ylabel(f'H{con.sub2}O{con.sub2} photolysis rate coefficient {con.pers}')
-plt.title(f'Daily mean H{con.sub2}O{con.sub2} photolysis rate coefficients from different models')
+plt.ylabel(f'NO{con.sub2} photolysis rate coefficient {con.pers}')
+plt.title(f'Daily mean NO{con.sub2} photolysis rate coefficients from different models')
 plt.legend()
 plt.show()
 plt.close()
-'''

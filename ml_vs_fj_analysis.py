@@ -10,7 +10,7 @@ import functions as fns
 import file_paths as paths
 import matplotlib.pyplot as plt
 import matplotlib.dates as mdates
-from sklearn.metrics import r2_score, mean_squared_error
+from sklearn.metrics import r2_score, mean_squared_error, mean_absolute_percentage_error
 
 
 def round_digits(num, sig_figs=3):
@@ -35,7 +35,6 @@ def avg_data(x, y):
   y_avg = [y[x == val].mean() for val in xs]
   return xs, y_avg
 
-
 # Experiment.
 run = '1'
 
@@ -43,10 +42,10 @@ run = '1'
 path_fj = f'{paths.npy}/fj{run}yr.npy'
 
 # ML-predicted photolysis dataset.
-path_ml = f'{paths.npy}/ml{run}yr.npy'
+path_ml = f'{paths.npy}/ml{run}yr_masked.npy'
 
 # Where to save the plots.
-exp = 'online_global_30yr_masked'
+exp = ''
 fig_path = f'{paths.analysis}/{exp}'
 
 # Names, info & units of outputs in dataset order.
@@ -56,9 +55,10 @@ pers = f'/ {con.pers}'
 kg = f'/ kg kg{con.supminus}{con.sup1}'
 mols = f'/ mol {con.pers}' 
 du = '/ DU'
+ks = f'/ K {con.pers}'
 
 names = [
-         ['Shortwave heating rates', '', ''], 
+         ['Shortwave heating rates', '', ks], 
 	 [f'O{con.sub3}', mmr, kg], 
 	 ['NO', mmr, kg], 
 	 ['Peroxyacetyl nitrate', mmr, kg], 
@@ -68,7 +68,7 @@ names = [
 	 [f'HO{con.sub2}', mmr, kg], 
 	 [f'H{con.sub2}O', mmr, kg], 
 	 [f'O{con.subx} production', '', mols], 
-	 [f'CH{con.sub4} lifetime', '', mols], 
+	 [f'CH{con.sub4} + OH reaction flux', '', mols], 
 	 [f'O{con.sub3} column', '', du],
 	 ['HCHO (radical reaction)', j, pers], 
          ['HCHO (molecular reaction)', j, pers],
@@ -100,44 +100,83 @@ names = [
 
 # Load both datasets.
 print('\nLoading data.')
-print(exp)
+#print(exp)
 data_fj = np.load(path_fj)
 data_ml = np.load(path_ml)
 print(data_fj.shape, data_ml.shape)
 
+# All levels.
+#alt_min, alt_max = 0, 1
 # Troposphere. ~ 0 to 10 km above sea-level.
-#alt_min, alt_max = 0, 0.121
+alt_min, alt_max = 0, 0.121
 # Mid stratosphere. 25 to 40 km.
 #alt_min, alt_max = 0.29, 0.47
 # Surface. 0-1 km.
 #alt_min, alt_max = 0, 0.0018 
+
+# Whole globe.
+#lat_min, lat_max = -90, 90
 # The equator. ~ 20N to 20S.
 #lat_min, lat_max = -20, 20
 # South pole. 
-#lat_min, lat_max = -90, -60
-#data_area_fj = get_area(data_fj, alt_min, alt_max, lat_min, lat_max)
-#data_area_ml = get_area(data_ml, alt_min, alt_max, lat_min, lat_max)
-#print(data_area_fj.shape, data_area_ml.shape)
+lat_min, lat_max = -90, -60
+
+data_fj = get_area(data_fj, alt_min, alt_max, lat_min, lat_max)
+data_ml = get_area(data_ml, alt_min, alt_max, lat_min, lat_max)
+print(data_fj.shape, data_ml.shape)
 
 # Print accuracy metrics.
+print('\nR2 scores:')
 for i in range(18, len(data_fj)):
   item_fj = data_fj[i]
   item_ml = data_ml[i]
   r2 = r2_score(item_fj, item_ml)
   print(r2)
-  
-print()
+ 
+print('\nMSE:')
 for i in range(18, len(data_fj)):
   item_fj = data_fj[i]
   item_ml = data_ml[i]
   mse = mean_squared_error(item_fj, item_ml)
   print(mse)  
-
-'''
-# For every output, make a correlation plot of ML and Fast-JX.
-for i in range(6, len(data_fj)):
+'''  
+print('\nMean relative error:')
+for i in range(18, len(data_fj)):
   item_fj = data_fj[i]
   item_ml = data_ml[i]
+  mask = item_fj != 0
+  rel_err = (np.abs(item_ml[mask] - item_fj[mask]) / np.abs(item_fj)[mask]) * 100
+  #rel_err = ((item_ml - item_fj) / item_fj) * 100
+  rel_err_mean = np.nanmean(rel_err)
+  print(rel_err_mean)   
+  
+print('\nMaximum relative error:')
+for i in range(18, len(data_fj)):
+  item_fj = data_fj[i]
+  item_ml = data_ml[i]
+  mask = item_fj != 0
+  rel_err = (np.abs(item_ml[mask] - item_fj[mask]) / np.abs(item_fj[mask])) * 100
+  rel_err_max = np.max(rel_err)
+  print(rel_err_max)  
+  
+print('\nMAPE:')
+for i in range(18, len(data_fj)):
+  item_fj = data_fj[i]
+  item_ml = data_ml[i]
+  mape = mean_absolute_percentage_error(item_fj, item_ml)
+  print(mape)    
+
+print('\nSMAPE:')
+for i in range(18, len(data_fj)):
+  item_fj = data_fj[i]
+  item_ml = data_ml[i]
+  smape = fns.sMAPE(item_fj, item_ml)
+  print(smape)  
+
+# For every output, make a correlation plot of ML and Fast-JX.
+for i in range(6, len(data_fj)):
+  item_fj = data_fj[i].squeeze()
+  item_ml = data_ml[i].squeeze()
   
   # Get its name.
   fullname = names[i-6]
@@ -162,17 +201,16 @@ for i in range(6, len(data_fj)):
   # Make a 1:1 reference line.
   ax.plot(item_fj, item_fj, linestyle=':', color='grey', alpha=0.5)
   
-  # Force axes to be identical.
-  #fns.force_axes()
-  # Set bottom to 0 for vars which are positive and small.
-  #if min(min(item_fj), min(item_ml)) >= 0: 
+  ax.set_xscale('log')
+  ax.set_yscale('log')
   ax.set_xlim(left=0)
   ax.set_ylim(bottom=0)
   
   ax.set_title(title)
   ax.set_xlabel(xlab)
   ax.set_ylabel(ylab)
-  plt.savefig(f'{fig_path}/{fullname[0]}_correlation.png')
+  plt.show()
+  #plt.savefig(f'{fig_path}/{fullname[0]}_correlation.png')
   plt.close()
 
 # For every output, 

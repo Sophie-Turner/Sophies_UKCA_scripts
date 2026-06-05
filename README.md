@@ -105,7 +105,7 @@ Use the low_res_sample_train.py script. Adapt it for your own file paths and wha
 If you made your own UKCA code and output different J-values to me, or different input data, you'll need to change the indexing of the dataset in the Python scripts and make sure the right things are used as inputs and targets.
 
 1. Do part B, above, or use my 1-year global data sample, 1982_45m.npy, which is at https://zenodo.org/records/20307039<br> 
-This file is 8.3 GB. Make sure you have enough program memory for it.
+This dataset is 8.3 GB. Make sure you have enough program memory for it.
 
 2. Use my conda environment, cenv, or your own Python environment with numpy and matplotlib:<br> 
 conda env create -f cenv.yml<br> 

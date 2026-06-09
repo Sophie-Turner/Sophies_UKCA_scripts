@@ -91,10 +91,10 @@ names_out = [
 	]
 
 # Troposphere. ~ 0 to 10 km above sea-level.
-#lvl_max = 70
-#targets = targets[inputs[:,2] < lvl_max] 
-#preds = preds[inputs[:,2] < lvl_max] 
-#inputs = inputs[inputs[:,2] < lvl_max]
+lvl_max = 40
+targets = targets[inputs[:,2] < lvl_max] 
+preds = preds[inputs[:,2] < lvl_max] 
+inputs = inputs[inputs[:,2] < lvl_max]
 
 # Problematic J rates to test.
 problems = [0, 4, 7, 11, 18, 20, 23, 24]
@@ -104,7 +104,7 @@ for i in problems:
   J_name = names_out[i] 
   
   # Spatial and temporal features.
-  for j in range(3):
+  for j in range(1):
     feature = inputs[:, j] 
     feature_name = names_in[j]
     # Average y by x.
@@ -112,9 +112,9 @@ for i in problems:
     features, pred_plot, plot_type, a = plot_data(feature, pred)
     # Make plot.
     plt.figure()
-    plot_type(features, pred_plot, label=f'L70 random forest', alpha=a)
     plot_type(features, target_plot, label=f'UKCA', alpha=a)
-    plt.title(f'Median {J_name[0]} {J_name[1]} by {feature_name[0]}')
+    plot_type(features, pred_plot, label=f'Random forest', alpha=a)
+    plt.title(f'Median tropospheric {J_name[0]} {J_name[1]} by {feature_name[0]}')
     plt.xlabel(f'{feature_name[0]} {feature_name[1]} {feature_name[2]}')  
     plt.ylabel(f'{J_name[0]} {J_name[1]} {J_name[2]}')
     plt.legend()

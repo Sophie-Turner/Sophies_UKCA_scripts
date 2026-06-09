@@ -18,8 +18,8 @@ import comparison_fns_shared as fns
 # File paths.
 path = '/scratch/st838/netscratch/'
 out_dir = path + 'analysis'
-ATom_dir = path + 'ATom_MER10_Dataset'
-UKCA_dir = path + 'nudged_J_outputs_for_ATom'
+ATom_dir = path + 'data/ATom_MER10_Dataset'
+UKCA_dir = path + 'data/nudged_J_outputs_for_ATom'
 ATom_file = f'{ATom_dir}/ATom_hourly_all.csv'
 UKCA_file = f'{UKCA_dir}/UKCA_hourly_all.csv'
 ATom_daily_files = glob.glob(ATom_dir + '/ATom_hourly_20*.csv') 
@@ -35,8 +35,8 @@ for field in ATom_all.columns:
   fns.diffs(ATom_field, UKCA_field, 'ATom', 'UKCA', out_dir)
   print(f'\nSaving plots for {field} comparisons.\n')
   fns.plot_data(ATom_field, UKCA_field, out_dir, True)
-  fns.plot_diff(ATom_field, UKCA_field, out_dir)
-  fns.plot_corr(out_dir, ATom_field, UKCA_field, remove_null=True, remove_zero=True)
+  #fns.plot_diff(ATom_field, UKCA_field, out_dir)
+  #fns.plot_corr(out_dir, ATom_field, UKCA_field, remove_null=True, remove_zero=True)
   
   # Look at each flight.
   for ATom_day_file in ATom_daily_files:
@@ -48,6 +48,6 @@ for field in ATom_all.columns:
       UKCA_day = pd.read_csv(UKCA_day_file, index_col=0)
       # As long as the data aren't all missing for this flight, plot them.
       if ATom_day[field].notnull().any(): 
-        fns.plot_location(ATom_day, UKCA_day, out_dir)
+        #fns.plot_location(ATom_day, UKCA_day, out_dir)
         fns.plot_timeseries(ATom_day[field], UKCA_day[field], out_dir)
-        fns.plot_corr(out_dir, ATom_day[field], UKCA_day[field], UKCA_day['LATITUDE'], remove_null=True)    
+        #fns.plot_corr(out_dir, ATom_day[field], UKCA_day[field], UKCA_day['LATITUDE'], remove_null=True)    

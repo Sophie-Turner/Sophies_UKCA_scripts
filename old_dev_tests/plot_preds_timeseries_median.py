@@ -97,13 +97,13 @@ for J in [O3, NO2, HCHOr, H2O2]:
   med_pred, q25_pred, q75_pred = hour_medians(inputs, pred)
   
   # Draw the plot.
-  plt.fill_between(x, q25_target, q75_target, color='palegreen', alpha=0.3, label=f'IQR of J{name} from Fast-J')
-  plt.fill_between(x, q25_pred, q75_pred, color='lightsalmon', alpha=0.3, label=f'IQR of J{name} from random forest')
-  plt.plot(x, med_target, color='green', label=f'Median of J{name} from Fast-J')
-  plt.plot(x, med_pred, color='orangered', label=f'Median of J{name} from random forest')
+  plt.fill_between(x, q25_target, q75_target, color='tab:blue', alpha=0.3, label=f'IQR of J{name} from UKCA')
+  plt.fill_between(x, q25_pred, q75_pred, color='tab:orange', alpha=0.3, label=f'IQR of J{name} from random forest')
+  plt.plot(x, med_target, color='tab:blue', label=f'Median of J{name} from UKCA')
+  plt.plot(x, med_pred, color='tab:orange', label=f'Median of J{name} from random forest')
   plt.legend()
   plt.title(f'Median {name} photolysis rates above Cambridge at each hour of the day in the Summer of 2015')
   plt.xlabel('Hour of day, UTC')
-  plt.ylabel(f'J rate / {con.pers}')
+  plt.ylabel(f'J-value / {con.pers}')
   plt.show()
   plt.close()

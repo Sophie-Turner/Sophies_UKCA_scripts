@@ -218,13 +218,13 @@ def plot_timeseries(dataATom, dataUKCA, path):
   x = [t[0:5] for t in times] # Cut the extra 00s for seconds off the time labels.
   y1 = dataATom
   y2 = dataUKCA
-  plt.plot(x, y1, label='ATom')
-  plt.plot(x, y2, label='UKCA')
+  plt.plot(x, y1, color='tab:pink', label='ATom')
+  plt.plot(x, y2, color='tab:blue', label='UKCA')
   plt.xlabel('time')
   plt.ylabel(label)
   plt.legend()
-  plt.savefig(f'{path}/{name}_{date}_ts.png')
-  #plt.show()    
+  #plt.savefig(f'{path}/{name}_{date}_ts.png')
+  plt.show()    
   plt.close()
   
   
@@ -273,8 +273,8 @@ def plot_corr(path, dataATom, dataUKCA, other=None, remove_null=False, remove_ze
   else:
     plt.title(f'CORRELATION OF {title} FROM ATOM AND UKCA') 
     path = f'{path}/{name}_corr.png'
-  plt.savefig(path)
-  #plt.show() 
+  #plt.savefig(path)
+  plt.show() 
   plt.close()
   
 
@@ -312,13 +312,13 @@ def plot_data(dataATom, dataUKCA, path, remove_zero=False):
     xlabel = f'Log of {name} non-zero values'
   else:
     xlabel = name
-  plt.hist(dataATom, bins=50, histtype='step', density=False, label='ATom') # Change denstiy to True to put % of data points on y axis.
-  plt.hist(dataUKCA, bins=50, histtype='step', density=False, label='UKCA') 
+  plt.hist(dataATom, bins=50, histtype='step', color='tab:pink', density=False, label='ATom') # Change denstiy to True to put % of data points on y axis.
+  plt.hist(dataUKCA, bins=50, histtype='step', color='tab:blue', density=False, label='UKCA') 
   plt.xlabel(xlabel)
   plt.ylabel('Number of data points')
   plt.legend()
-  plt.savefig(f'{path}/{name}_data.png')
-  #plt.show()
+  #plt.savefig(f'{path}/{name}_data.png')
+  plt.show()
   plt.close()
   
   
@@ -341,7 +341,7 @@ def plot_location(data1, data2, path):
   pylab.legend()
   pylab.colorbar(label='Altitude / m', shrink=0.8)
   pylab.tight_layout()
-  pylab.savefig(f'{path}/{date}_loc.png')
-  #pylab.show()
+  #pylab.savefig(f'{path}/{date}_loc.png')
+  pylab.show()
   pylab.close()
   

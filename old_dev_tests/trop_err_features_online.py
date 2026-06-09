@@ -20,14 +20,14 @@ def avg_data(x, y):
 
 
 # Fast-JX dataset (control).
-path_fj = f'{paths.data}/fj1yr/19820102.npy'
-#path_fj = f'{paths.npy}/fj1mon.npy'
+#path_fj = f'{paths.data}/fj1yr/19820102.npy'
+path_fj = f'{paths.npy}/fj1mon.npy'
 # ML dataset.
-path_ml = f'{paths.data}/ml1yr/19820102.npy'
-#path_ml = f'{paths.npy}/ml1mon.npy'
+#path_ml = f'{paths.data}/ml1yr/19820102.npy'
+path_ml = f'{paths.npy}/ml1mon.npy'
 # ML dataset, masked.
-path_mask = f'{paths.data}/ml1yr_masked/19820102.npy'
-#path_mask = f'{paths.npy}/ml1mon_masked_tuned.npy'
+#path_mask = f'{paths.data}/ml1yr_masked/19820102.npy'
+path_mask = f'{paths.npy}/ml1mon_masked_tuned.npy'
 
 # Names, info & units of outputs in dataset order.
 j = 'photolysis rate coefficient' 
@@ -92,11 +92,11 @@ data_mask = np.load(path_mask)
 print(data_fj.shape, data_ml.shape, data_mask.shape)
 
 # Lower model levels.
-lvl_max = 60
+lvl_max = 70
 data_fj = data_fj[:, (data_fj[2] < lvl_max)] # 2 is model level.
 data_ml = data_ml[:, (data_ml[2] < lvl_max)]
 data_mask = data_mask[:, (data_mask[2] < lvl_max)]
-'''
+
 # Sample the data down to a plottable size.
 idx_fj = con.rng.choice(data_fj.shape[1], size=10000, replace=False)
 idx_ml = con.rng.choice(data_ml.shape[1], size=10000, replace=False)
@@ -104,7 +104,7 @@ idx_fj = np.sort(idx_fj)
 idx_ml = np.sort(idx_ml)
 data_fj_sample = data_fj[:, idx_fj]
 data_ml_sample = data_ml[:, idx_ml]
-'''
+
 # Problematic items to test.
 problems = [7, 12, 13, 15, 16, 17, 22, 23, 25, 29, 36, 37, 38, 41, 42]
 #problems = [12, 13, 29]
@@ -114,7 +114,7 @@ for i in problems:
   # Spatial and temporal features.
   for j in range(4):
     feature_name = names[j]
- 
+    
     # Line plots of averages.
     item_fj, item_ml, item_mask = data_fj[i], data_ml[i], data_mask[i]
     feature_fj, feature_ml, feature_mask = data_fj[j], data_ml[j], data_mask[j]
@@ -124,31 +124,30 @@ for i in problems:
     features_mask, item_avg_mask = avg_data(feature_mask, item_mask)
     # Make plot.
     fig, ax = plt.subplots()
-    ax.plot(features_ml, item_avg_ml, color='blue', label=f'UM with random forest photolysis.')
-    ax.plot(features_mask, item_avg_mask, color='green', label=f'UM with random forest photolysis, masked.')
-    ax.plot(features_fj, item_avg_fj, color='orange', label=f'UM with Fast-JX photolysis.')
-    ax.set_title(f'Mean {item_name[0]} {item_name[1]} by {feature_name[0]} in a 1-day simulation')
-    ax.set_xlabel(f'{feature_name[0]} {feature_name[1]} {feature_name[2]}')  
-    ax.set_ylabel(f'{item_name[0]} {item_name[1]} {item_name[2]}')
+    ax.plot(item_avg_ml, features_ml, color='tab:orange', label=f'UM with random forest photolysis.')
+    ax.plot(item_avg_mask, features_mask, color='tab:pink', label=f'UM with random forest photolysis, masked.')
+    ax.plot(item_avg_fj, features_fj, color='tab:blue', label=f'UM with Fast-JX photolysis.')
+    ax.set_title(f'Mean {item_name[0]} {item_name[1]} by {feature_name[0]} in a 1-month simulation')
+    ax.set_ylabel(f'{feature_name[0]} {feature_name[1]} {feature_name[2]}')  
+    ax.set_xlabel(f'{item_name[0]} {item_name[1]} {item_name[2]}')
     ax.legend()
     plt.show()
     #plt.savefig(f'/scratch/st838/netscratch/analysis/online_masked_tuned_global/{item_name[0]} {feature_name[0]} 3.png')
     plt.close()
     
-    '''
     # Scatter plots of instantaneous points.
     item_fj, item_ml = data_fj_sample[i], data_ml_sample[i] 
     feature_fj, feature_ml = data_fj_sample[j], data_ml_sample[j] 
     fig, ax = plt.subplots()
-    ax.scatter(feature_ml, item_ml, label=f'UM with random forest photolysis.', alpha=0.1)
-    ax.scatter(feature_fj, item_fj, label=f'UM with Fast-JX photolysis.', alpha=0.1)
+    ax.scatter(item_ml, feature_ml, color='tab:orange', label=f'UM with random forest photolysis.', alpha=0.1)
+    ax.scatter(item_fj, feature_fj, color='tab:blue', label=f'UM with Fast-JX photolysis.', alpha=0.1)
     ax.set_title(f'{item_name[0]} {item_name[1]} by {feature_name[0]} in a 1-month simulation')
-    ax.set_xlabel(f'{feature_name[0]} {feature_name[1]} {feature_name[2]}')  
-    ax.set_ylabel(f'{item_name[0]} {item_name[1]} {item_name[2]}')
+    ax.set_ylabel(f'{feature_name[0]} {feature_name[1]} {feature_name[2]}')  
+    ax.set_xlabel(f'{item_name[0]} {item_name[1]} {item_name[2]}')
     ax.legend()
     plt.show()
     plt.close()
-    '''
+    
   '''
   # Correlation plot.
   plt.scatter(item_fj, item_ml, alpha=0.1)

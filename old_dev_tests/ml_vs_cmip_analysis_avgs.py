@@ -47,7 +47,7 @@ mr_o3 = 48
 
 # Load all datasets.
 data_paths = [path_bcc, path_ncar, path_cnrm, path_fj, path_ml]
-colours = ['tab:blue', 'tab:red', 'tab:purple', 'tab:orange', 'tab:green']
+colours = ['tab:green', 'tab:red', 'tab:purple', 'tab:blue', 'tab:orange']
 alphas = [0.5, 0.5, 0.5, 1, 1]
 
 for i in range(5):

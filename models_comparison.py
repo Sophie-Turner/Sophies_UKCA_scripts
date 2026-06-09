@@ -20,8 +20,6 @@ from sklearn.preprocessing import StandardScaler as scaler
 from sklearn.model_selection import train_test_split as tts
 from sklearn.ensemble import HistGradientBoostingRegressor as hgbr
 
-print('\nWithout scaling.')
-
 # Names, info & units of data of interest.
 j = 'photolysis rate coefficient' 
 pers = f'/ {con.pers}' 
@@ -31,16 +29,6 @@ names = [[f'NO{con.sub2}', j, pers],
          [f'H{con.sub2}O', j, pers]]
 
 idxs = [6, 2, 3]
-
-  
-def train_test(model, in_train, out_train, in_test):
-  # Train.
-  print('Training model.')
-  model.fit(in_train, out_train)
-  # Make preds.
-  print('Testing model.')
-  preds = model.predict(in_test)
-  return model, preds
   
   
 def avg_data(x, y):
@@ -48,7 +36,7 @@ def avg_data(x, y):
   xs = np.unique(x)
   y_avg = [y[x == val].mean() for val in xs]
   return xs, y_avg
-  
+
 
 def print_metrics(out_test, preds):
   r2 = r2_score(out_test, preds)
@@ -134,13 +122,13 @@ data = np.load(data_path)
 print(data.shape)	
 	
 # Reduce data size.
-#data = fns.sample(data, 15_000_000)	
+#data = fns.sample(data, 9_000_000)	
 	
 # Inputs and targets.
 inputs_idx = list(range(13))
-targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
-# HCHOr, OCS, NO3, H2O, H2O2, O3, NO2
-#targets_idx = [17,26,33,34,39,42,48] 
+#targets_idx = [17,18,19,23,26,27,28] + list(range(30,49))
+# HCHOr, OCS, NO3, H2O, O3, NO2
+targets_idx = [17,26,33,34,42,48] 
 inputs, targets = fns.in_out_swap(data, inputs_idx, targets_idx)
 
 # Free up some memory.
@@ -159,7 +147,7 @@ in_test_scaled = in_scaler.transform(in_test)
 # Save scaler for every model that uses it.
 #joblib.dump(in_scaler, f'{paths.mod}/ols/ols_in_scaler.pkl')
 #joblib.dump(in_scaler, f'{paths.mod}/lasso/lasso_in_scaler.pkl')
-#joblib.dump(in_scaler, f'{paths.mod}/svm/svm_in_scaler.pkl')
+joblib.dump(in_scaler, f'{paths.mod}/svm/svm_in_scaler.pkl')
 #joblib.dump(in_scaler, f'{paths.mod}/nn/nn_in_scaler.pkl')
 # Free up some memory.
 del in_scaler
@@ -169,11 +157,11 @@ eps = 1e-12
 out_train_scaled = np.log(out_train + eps)
 
 # Build and use the ML models.
-'''
+
 name = 'ordinary least squares'
 print(f'\n\n{name}:')
 model = linear_model.LinearRegression()
-model, preds = train_test(model, in_train, out_train, in_test)
+model, preds = fns.train_predict(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
 save_model_data(model, in_test, out_test, preds, 'ols')
@@ -181,7 +169,7 @@ save_model_data(model, in_test, out_test, preds, 'ols')
 name = 'decision tree'
 print(f'\n\n{name}:\n')
 model = DecisionTreeRegressor(max_leaf_nodes=100000, random_state=con.seed)
-model, preds = train_test(model, in_train, out_train, in_test)
+model, preds = fns.train_predict(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
 save_model_data(model, in_test, out_test, preds, 'tree')
@@ -190,7 +178,7 @@ name = 'random forest'
 print(f'\n\n{name}:\n')
 model = RandomForestRegressor(criterion='squared_error', n_estimators=20, n_jobs=20, max_features=0.2, 
                               max_samples=0.1, max_leaf_nodes=100000, random_state=con.seed)
-model, preds = train_test(model, in_train, out_train, in_test)
+model, preds = fns.train_predict(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
 save_model_data(model, in_test, out_test, preds, 'forest')
@@ -203,7 +191,7 @@ e = np.floor(np.log10(avg)) - 1
 reg = 10**e
 model = linear_model.Lasso(alpha=reg)
 #model = linear_model.Lasso(alpha=1e-3, tol=1e-4)
-model, preds = train_test(model, in_train, out_train, in_test)
+model, preds = fns.train_predict(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
 save_model_data(model, in_test, out_test, preds, 'lasso')
@@ -211,7 +199,7 @@ save_model_data(model, in_test, out_test, preds, 'lasso')
 name = 'neural network'
 print(f'\n\n{name}:\n')
 model = MLPRegressor(hidden_layer_sizes=(100,100,50,50))
-model, preds = train_test(model, in_train_scaled, out_train_scaled, in_test_scaled)
+model, preds = fns.train_predict(model, in_train_scaled, out_train_scaled, in_test_scaled)
 # Reverse output scaling.
 preds = np.exp(preds) - eps
 get_metrics(in_test, out_test, preds)
@@ -221,28 +209,98 @@ save_model_data(model, in_test, out_test, preds, 'nn')
 name = 'gradient boosting machine'
 print(f'\n\n{name}:\n')
 model = MultiOutputRegressor(hgbr(learning_rate=0.05, max_leaf_nodes=100, random_state=con.seed, max_iter=100))
-model, preds = train_test(model, in_train, out_train, in_test)
+model, preds = fns.train_predict(model, in_train, out_train, in_test)
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)	
 save_model_data(model, in_test, out_test, preds, 'gbm')
 
 name = 'support vector machine'
 print(f'\n\n{name}:\n')
-model = MultiOutputRegressor(LinearSVR(max_iter=500, verbose=1), n_jobs=1)
-model, preds = train_test(model, in_train, out_train, in_test)
+model = MultiOutputRegressor(LinearSVR(max_iter=1000, verbose=1), n_jobs=3)
+model, preds = fns.train_predict(model, in_train_scaled, out_train, in_test_scaled)
 save_model_data(model, in_test, out_test, preds, 'svm')
 get_metrics(in_test, out_test, preds)
 plot_timeseries(in_test, out_test, preds, name)
-'''
+
 # Load all the preds.
 models = ['ols', 'lasso',  'svm', 'tree', 'gbm', 'forest', 'nn'] 
 names = ['OLS', 'LASSO', 'SVM', 'decision tree', 'GBM', 'random forest', 'neural network']
-colours = ['tab:purple', 'tab:green', 'tab:gray', 'tab:orange', 'tab:red', 'tab:pink', 'tab:cyan']
+colours = ['tab:purple', 'tab:green', 'tab:gray', 'tab:olive', 'tab:red', 'tab:pink', 'tab:cyan']
+
+# Plots for each model separately.
+
+# Column.
+# Plot each models' preds on a separate graph.
+for i in range(len(models)):
+  model = models[i]
+  name = names[i]
+  inputs, targets, preds = fns.load_model_data(model)
+  lvl = inputs[:, 2].squeeze()
+  target = targets[:, 0].squeeze()
+  pred = preds[:, 0].squeeze() 
+  lvls, target_avg = avg_data(lvl, target)
+  _, pred_avg = avg_data(lvl, pred)
+  plt.plot(target_avg, lvls, color='tab:orange', label=f'UKCA')
+  plt.plot(pred_avg, lvls, color='tab:blue', label=f'{name}') 
+  plt.xscale('log')
+  plt.xlabel(f'photolysis rate coefficient {con.pers}')
+  plt.ylabel('Vertical model level')
+  plt.title(f'Mean HCHO photolysis rate coefficient profiles')
+  plt.legend()
+  plt.show()
+  plt.close()
+
+# Timeseries.
+for i in range(len(models)):
+  model = models[i]
+  name = names[i]
+  inputs, targets, preds = fns.load_model_data(model)
+  day = inputs[:, 0].squeeze()
+  # SVM has fewer output features.
+  if i == 2:
+    target = targets[:, 0].squeeze()
+    pred = preds[:, 0].squeeze()
+  else:
+    target = targets[:, 0].squeeze()
+    pred = preds[:, 0].squeeze()
+  days, target_avg = avg_data(day, target)
+  _, pred_avg = avg_data(day, pred)
+  plt.plot(days, target_avg, color='tab:orange', label=f'UKCA')
+  plt.plot(days, pred_avg, color='tab:blue', label=f'{name}') 
+  plt.xlabel('Day of year')  
+  plt.ylabel(f'photolysis rate coefficient {con.pers}')
+  plt.title(f'Daily mean HCHO photolysis rate coefficients in a 1-year {name} test')
+  plt.legend()
+  plt.show()
+  plt.close()
+
+# Diff.
+for i in range(len(models)):
+  model = models[i]
+  name = names[i]
+  inputs, targets, preds = fns.load_model_data(model)
+  if i == 2:
+    pred = preds[:, -1].squeeze()
+    target = targets[:, -1].squeeze()
+  else:
+    pred = preds[:, -1].squeeze()
+    target = targets[:, -1].squeeze()
+  diff = pred - target
+  plt.hist(diff, bins=100, histtype='step')
+  plt.axvline(0, color='grey', linestyle='--')
+  plt.title(f'Difference between NO{con.sub2} J-value targets from UKCA and predictions from {name}')
+  plt.xlabel('Difference (predictions - targets)')
+  plt.ylabel('Number of data samples')
+  plt.show()
+  plt.close()
+
+# Plot all models on one graph.
 
 # Independent data.
 target = out_test[:, -1].squeeze()
 lvl = in_test[:, 2].squeeze()
 lvls, target_avg = avg_data(lvl, target)
+
 plt.plot(target_avg, lvls, color='black', linewidth=4, label=f'NO{con.sub2} J-values from UKCA')
 
 # Plot all models' preds on one graph.
@@ -258,8 +316,8 @@ for i in range(len(models)):
     pred = preds[:, -1].squeeze()
   _, pred_avg = avg_data(lvl, pred)
   plt.plot(pred_avg, lvls, color=colour, label=f'NO{con.sub2} J-values from {name}') 
-  plt.xscale('log')
   
+plt.xscale('log')
 plt.xlabel(f'NO{con.sub2} photolysis rate coefficient {con.pers}')
 plt.ylabel('Vertical model level')
 plt.title(f'Mean NO{con.sub2} photolysis rate coefficient profiles from different models')
@@ -290,6 +348,29 @@ for i in range(len(models)):
 plt.xlabel('Day of year')  
 plt.ylabel(f'NO{con.sub2} photolysis rate coefficient {con.pers}')
 plt.title(f'Daily mean NO{con.sub2} photolysis rate coefficients from different models')
+plt.legend()
+plt.show()
+plt.close()
+
+# Difference error distribution plot.
+for i in range(len(models)):
+  model = models[i]
+  name = names[i]
+  colour = colours[i]
+  inputs, targets, preds = fns.load_model_data(model)
+  if i == 2:
+    pred = preds[:, -1].squeeze()
+    target = targets[:, -1].squeeze()
+  else:
+    pred = preds[:, -1].squeeze()
+    target = targets[:, -1].squeeze()
+  diff = pred - target
+  plt.hist(diff, bins=100, histtype='step', color=colour, label=name)
+plt.xlim(-0.02, 0.02)
+plt.axvline(0, color='grey', linestyle='--')
+plt.title(f'Difference between NO{con.sub2} J-value targets from UKCA and predictions from different models')
+plt.xlabel('Difference (predictions - targets)')
+plt.ylabel('Number of data samples')
 plt.legend()
 plt.show()
 plt.close()

@@ -311,10 +311,20 @@ def lvl_to_alt(orography: float, include_surface: bool = False) -> list:
 # ML functions.  
   
 def train(in_train, out_train):
-  '''Set up simple model.'''
+  '''Set up simple OLS model.'''
   model = linear_model.LinearRegression()
   model.fit(in_train, out_train)
   return(model)
+  
+  
+def train_predict(model, in_train, out_train, in_test):
+  # Train model and get preds.
+  print('Training model.')
+  model.fit(in_train, out_train)
+  # Make preds.
+  print('Testing model.')
+  preds = model.predict(in_test)
+  return(model, preds)
 
 
 def sMAPE(out_test, out_pred):
@@ -560,6 +570,7 @@ def line(xdata, ydata, xdata2=None, ydata2=None, title='', xlab='', ylab='', leg
   
   
 def show(out_test, out_pred, maxe=None, mse=None, mape=None, smape=None, r2=None, j='', t=None):
+  # Correlation plot.
   r2 = round(r2, 3)
   if maxe is not None: print(f'MaxE = {maxe}') 
   if mse is not None: print(f'MSE = {mse}') 
@@ -639,12 +650,12 @@ def show_col_orig(data, ij=78, name='O3', all_time=True):
   alts = alts * 85
   # Plot the J rate by altitude in that column.
   if all_time:
-    plt.scatter(j, alts, label=f'J{name} from UKCA', alpha=0.2)
-    plt.title('UKCA column ozone J rates over Cambridge in 2015')
+    plt.scatter(j, alts, label=f'J({name}) from UKCA', alpha=0.2)
+    plt.title('UKCA column ozone J-values over Cambridge in 2015')
   else:
-    plt.plot(j, alts, label=f'J{name} from UKCA')
-    plt.title('UKCA column ozone J rates over Cambridge at midday on 15/1/2015')
-  plt.xlabel(f'{con.rxnO3} J rate')
+    plt.plot(j, alts, label=f'J({name}) from UKCA')
+    plt.title('UKCA column ozone J-values over Cambridge at midday on 15/1/2015')
+  plt.xlabel(f'J-value / {con.pers}')
   plt.ylabel('Altitude / km')
   plt.show()
   plt.close()
@@ -696,15 +707,15 @@ def show_col(out_test, out_pred, coords, ij, name='O3', all_time=True):
   j2, alts = col(out_pred, coords, lat, lon, hour, ij)  
   # Plot the J rate by altitude in that column.
   if all_time:
-    plt.scatter(j1, alts, label=f'J{name} from UKCA', marker='|', s=50, alpha=0.5)
-    plt.scatter(j2, alts, label=f'J{name} from random forest', marker='_', s=50, alpha=0.5)
-    plt.title('UKCA J rates, column over Cambridge in 2015')
+    plt.scatter(j1, alts, label=f'J({name}) from UKCA', marker='|', s=50, alpha=0.5)
+    plt.scatter(j2, alts, label=f'J({name}) from random forest', marker='_', s=50, alpha=0.5)
+    plt.title('UKCA J-values, column over Cambridge in 2015')
   else:
-    plt.plot(j1, alts, label=f'J{name} from UKCA')
-    plt.plot(j2, alts, label=f'J{name} from random forest') 
-    plt.title(f'UKCA J{name}, column over Cambridge at midday on 15/7/2015')
+    plt.plot(j1, alts, label=f'J({name}) from UKCA')
+    plt.plot(j2, alts, label=f'J({name}) from random forest') 
+    plt.title(f'UKCA {name} photolysis rate coefficients, column over Cambridge at midday on 15/7/2015')
   plt.legend()    
-  plt.xlabel(f'J{name} / {con.pers}')
+  plt.xlabel(f'J-value / {con.pers}')
   plt.ylabel('Altitude / km')
   plt.show()
   # Column percentage difference plot.
@@ -714,7 +725,7 @@ def show_col(out_test, out_pred, coords, ij, name='O3', all_time=True):
   else:
     plt.plot(diff, alts)
     plt.axvline(linestyle=':')
-  plt.title(f'Column % difference of J{name} predictions to UKCA outputs')
+  plt.title(f'Column % difference of J({name}) predictions to UKCA outputs')
   plt.xlabel('% difference')
   plt.ylabel('Altitude / km')
   plt.show()

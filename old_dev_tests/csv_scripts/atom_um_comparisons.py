@@ -15,6 +15,7 @@ import glob
 import pandas as pd
 import comparison_fns_shared as fns
  
+ 
 # File paths.
 path = '/scratch/st838/netscratch/'
 out_dir = path + 'analysis'
@@ -31,13 +32,19 @@ UKCA_all = pd.read_csv(UKCA_file, index_col=0)
 for field in ATom_all.columns:
   ATom_field = ATom_all[field]
   UKCA_field = UKCA_all[field] 
+  
+  # Remove zeros.
+  mask = UKCA_field != 0
+  UKCA_field = UKCA_field[mask]
+  ATom_field = ATom_field[mask]
+  
   print(f'\nComparing {field}.')
   fns.diffs(ATom_field, UKCA_field, 'ATom', 'UKCA', out_dir)
   print(f'\nSaving plots for {field} comparisons.\n')
-  fns.plot_data(ATom_field, UKCA_field, out_dir, True)
+  #fns.plot_data(ATom_field, UKCA_field, out_dir, True)
   #fns.plot_diff(ATom_field, UKCA_field, out_dir)
   #fns.plot_corr(out_dir, ATom_field, UKCA_field, remove_null=True, remove_zero=True)
-  
+'''  
   # Look at each flight.
   for ATom_day_file in ATom_daily_files:
     ATom_day = pd.read_csv(ATom_day_file, index_col=0)
@@ -51,3 +58,4 @@ for field in ATom_all.columns:
         #fns.plot_location(ATom_day, UKCA_day, out_dir)
         fns.plot_timeseries(ATom_day[field], UKCA_day[field], out_dir)
         #fns.plot_corr(out_dir, ATom_day[field], UKCA_day[field], UKCA_day['LATITUDE'], remove_null=True)    
+'''

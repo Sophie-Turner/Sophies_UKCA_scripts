@@ -62,10 +62,10 @@ preds_large = model_large.predict(in_test)
   
 # View vertical column profile for NO2.
 alt = in_test[:,1] * 85
-plt.plot(out_test, alt, color='tab:orange', label='UKCA')
-plt.plot(preds_small, alt, color='tab:blue', label='Random forest trained on 50 data points per day', )
-plt.plot(preds_large, alt, color='tab:green', label='Random forest trained on 500,000 data points per day')
-plt.xscale('log')
+plt.plot(out_test, alt, color='tab:blue', label='UKCA')
+plt.plot(preds_small, alt, color='tab:orange', label='Random forest trained on 50 data points per day', )
+plt.plot(preds_large, alt, color='tab:pink', label='Random forest trained on 500,000 data points per day')
+#plt.xscale('log')
 plt.title(f'NO{con.sub2} J-values in a vertical column over Cambridge at midday on 15th July 2015.')
 plt.xlabel(f'J-value / {con.pers}')
 plt.ylabel('Height / km')
@@ -76,8 +76,8 @@ plt.close()
 # View error difference plot in vertical column.
 diff_small = ((preds_small.squeeze() - out_test.squeeze()) / out_test.squeeze()) * 100
 diff_large = ((preds_large.squeeze() - out_test.squeeze()) / out_test.squeeze()) * 100
-plt.plot(diff_small, alt, color='tab:blue', label='Random forest trained on 50 data points per day', )
-plt.plot(diff_large, alt, color='tab:green', label='Random forest trained on 500,000 data points per day')
+plt.plot(diff_small, alt, color='tab:orange', label='Random forest trained on 50 data points per day', )
+plt.plot(diff_large, alt, color='tab:pink', label='Random forest trained on 500,000 data points per day')
 plt.axvline(x=0, color='grey', linestyle='--', linewidth=1)
 plt.title(f'NO{con.sub2} J-values in a vertical column over Cambridge at midday on 15th July 2015.')
 plt.xlabel(f'Percentage difference of ML predictions to UKCA targets')

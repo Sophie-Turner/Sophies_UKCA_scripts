@@ -281,18 +281,31 @@ def plot_corr(path, dataATom, dataUKCA, other=None, remove_null=False, remove_ze
 def plot_diff(dataATom, dataUKCA, path):
   # Works best with data from all times and all flights at once, and one field.
   # Relative difference.  
-  rel_diff = rel_diff_no_zero(dataATom, dataUKCA)
+  #rel_diff = rel_diff_no_zero(dataATom, dataUKCA)
+  rel_diff = dataUKCA - dataATom
+  # Standard deviations.
+  mean = np.mean(rel_diff)
+  sd = np.std(rel_diff)
+  sd_low_1 = mean - sd
+  sd_high_1 = mean + sd
+  sd_low_2 = mean - (sd * 2)
+  sd_high_2 = mean + (sd * 2)
   # If a field is full of zeros and nans, a plot won't work.
   if len(rel_diff != 0):
     title = make_title(dataATom.name)
     name = make_filename(title)
     plt.figure()
     plt.title(f'UKCA DIFFERENCE TO ATOM FOR {title}')
-    plt.hist(rel_diff, bins=50, density=False) # Change denstiy to True to put % of data points on y axis.
-    plt.xlabel('% difference')
+    plt.hist(rel_diff, bins=100, histtype='step', density=False) # Change denstiy to True to put % of data points on y axis.
+    plt.axvline(0, color='grey', linestyle='--', label='No difference')
+    plt.axvline(mean, color='tab:orange', label='Mean')
+    plt.axvline(sd_low_1, color='tab:blue', label='Sandard deviation')
+    plt.axvline(sd_high_1, color='tab:blue')
+    plt.xlabel('Difference (UKCA - ATom)')
     plt.ylabel('Number of data points')
-    plt.savefig(f'{path}/{name}_diff.png')
-    #plt.show()
+    plt.legend()
+    #plt.savefig(f'{path}/{name}_diff.png')
+    plt.show()
     plt.close()
   
   

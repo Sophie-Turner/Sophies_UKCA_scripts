@@ -95,8 +95,8 @@ def plot_timeseries(in_test, out_test, preds, model_name):
     
     # Make plot.
     fig, ax = plt.subplots()
-    ax.plot(item_avg_fj, lvls, label='UKCA')
     ax.plot(item_avg_ml, lvls, label=model_name)
+    ax.plot(item_avg_fj, lvls, label='UKCA')
     
     # Format plot.
     ax.set_title(f'Mean {name[0]} {name[1]} by model level in a 1-year {model_name} test')
@@ -114,7 +114,6 @@ def save_model_data(model, in_test, out_test, preds, name):
   np.save(f'{paths.mod}/{name}/{name}_targets.npy', out_test)
   np.save(f'{paths.mod}/{name}/{name}_pred.npy', preds)
 
-	
 # Dataset.	
 data_path = f'{paths.npy}/1982_45m.npy'
 print('\nLoading data from', data_path)
@@ -240,10 +239,10 @@ for i in range(len(models)):
   pred = preds[:, 0].squeeze() 
   lvls, target_avg = avg_data(lvl, target)
   _, pred_avg = avg_data(lvl, pred)
-  plt.plot(target_avg, lvls, color='tab:orange', label=f'UKCA')
-  plt.plot(pred_avg, lvls, color='tab:blue', label=f'{name}') 
-  plt.xscale('log')
-  plt.xlabel(f'photolysis rate coefficient {con.pers}')
+  plt.plot(target_avg, lvls, color='tab:blue', label=f'UKCA')
+  plt.plot(pred_avg, lvls, color='tab:orange', label=f'{name}') 
+  #plt.xscale('log')
+  plt.xlabel(f'photolysis rate coefficient / {con.pers}')
   plt.ylabel('Vertical model level')
   plt.title(f'Mean HCHO photolysis rate coefficient profiles')
   plt.legend()
@@ -265,8 +264,8 @@ for i in range(len(models)):
     pred = preds[:, 0].squeeze()
   days, target_avg = avg_data(day, target)
   _, pred_avg = avg_data(day, pred)
-  plt.plot(days, target_avg, color='tab:orange', label=f'UKCA')
-  plt.plot(days, pred_avg, color='tab:blue', label=f'{name}') 
+  plt.plot(days, target_avg, color='tab:blue', label=f'UKCA')
+  plt.plot(days, pred_avg, color='tab:orange', label=f'{name}') 
   plt.xlabel('Day of year')  
   plt.ylabel(f'photolysis rate coefficient {con.pers}')
   plt.title(f'Daily mean HCHO photolysis rate coefficients in a 1-year {name} test')
